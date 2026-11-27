@@ -1,0 +1,1608 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mind AI | منصة الصف الرابع الأساسي الشاملة والذكية</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
+body { background: linear-gradient(135deg, #fff8df, #ffe082, #fff4c2); color: #333; direction: rtl; text-align: right; min-height: 100vh; }
+body.locked { overflow: hidden; }
+
+.student-access-gate {
+    position: fixed; inset: 0; z-index: 5000;
+    background: linear-gradient(135deg, #fff8df, #ffe082, #fff4c2);
+    display: flex; align-items: center; justify-content: center; padding: 25px;
+}
+.student-access-gate.hidden { display: none !important; }
+.access-card {
+    width: 100%; max-width: 480px; background: white; border-radius: 28px;
+    padding: 35px 28px; text-align: center; box-shadow: 0 15px 45px rgba(0,0,0,.18); border-top: 7px solid #b71c1c;
+}
+.access-logo { font-size: 55px; margin-bottom: 10px; }
+.access-card h1 { color: #b71c1c; margin-bottom: 10px; }
+.access-card p { color: #666; line-height: 1.8; margin-bottom: 20px; font-size: 15px; }
+.form-step { text-align: right; margin-bottom: 15px; }
+.form-step label { display: block; margin-bottom: 6px; font-weight: bold; color: #333; font-size: 14px; }
+.input { width: 100%; padding: 12px 15px; border: 2px solid #ddd; border-radius: 12px; font-size: 15px; outline: none; transition: .2s; background: #fff; }
+.input:focus { border-color: #b71c1c; }
+.btn { padding: 11px 18px; border: none; border-radius: 14px; font-size: 15px; font-weight: bold; cursor: pointer; transition: .2s; }
+.btn-primary { background: #b71c1c; color: white; }
+.btn-primary:hover { background: #961515; }
+.btn-yellow { background: #f0c419; color: #333; }
+.btn-yellow:hover { background: #dcb00f; }
+.btn-green { background: #2e7d32; color: white; }
+.btn-green:hover { background: #1b5e20; }
+.btn-yt { background: #ff0000; color: white; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
+.btn-yt:hover { background: #cc0000; }
+.btn-light { background: #eee; color: #333; }
+.btn-light:hover { background: #ddd; }
+.full-btn { width: 100%; }
+.access-error { color: #b71c1c; background: #ffebee; padding: 12px; border-radius: 12px; margin-top: 15px; display: none; font-weight: bold; font-size: 13px; }
+
+.menu-button {
+    position: fixed; top: 22px; right: 22px; z-index: 1000; width: 52px; height: 52px; border: none; border-radius: 16px; background: #b71c1c; color: white; font-size: 25px; cursor: pointer; box-shadow: 0 8px 22px rgba(0,0,0,.18);
+}
+.side-menu {
+    position: fixed; top: 0; right: -330px; width: 310px; max-width: 85vw; height: 100vh; background: white; z-index: 999; padding: 90px 22px 25px; box-shadow: -10px 0 30px rgba(0,0,0,.15); transition: .3s; overflow-y: auto;
+}
+.side-menu.open { right: 0; }
+.menu-title { font-size: 22px; font-weight: bold; color: #b71c1c; margin-bottom: 25px; }
+.menu-item {
+    width: 100%; border: none; background: #fff8df; border-right: 5px solid #d32f2f; padding: 18px; border-radius: 16px; margin-bottom: 14px; text-align: right; font-size: 17px; font-weight: bold; cursor: pointer; transition: .2s;
+}
+.menu-item:hover { transform: translateX(-3px); background: #fff1b8; }
+.menu-close { width: 100%; margin-top: 15px; }
+.menu-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 998; display: none; }
+.menu-overlay.show { display: block; }
+
+.container { max-width: 1250px; margin: 0 auto; padding: 25px; }
+.header { background: white; border-radius: 20px; padding: 20px 25px; box-shadow: 0 5px 20px rgba(0,0,0,.06); margin-bottom: 25px; }
+.header-box { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px; }
+.logo { display: flex; align-items: center; gap: 15px; }
+.logo-icon { font-size: 40px; }
+.logo-text strong { display: block; font-size: 20px; color: #b71c1c; }
+.logo-text span { font-size: 14px; color: #666; }
+.header-badge { background: #fff8df; border: 2px solid #f0c419; padding: 8px 16px; border-radius: 12px; font-weight: bold; color: #7a5600; }
+
+.cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; width: 100%; }
+.card { background: white; border-radius: 22px; padding: 25px; box-shadow: 0 8px 25px rgba(0,0,0,.06); cursor: pointer; transition: .2s; border-top: 5px solid #b71c1c; display: flex; flex-direction: column; justify-content: space-between; min-height: 220px; }
+.card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(0,0,0,.1); }
+.card-icon { font-size: 38px; margin-bottom: 12px; }
+.card h3 { color: #b71c1c; font-size: 20px; margin-bottom: 8px; }
+.card p { color: #666; font-size: 14px; line-height: 1.6; margin-bottom: 15px; }
+
+.app-view { display: none; }
+.app-view.show { display: block; }
+
+.selected-grade-display-box {
+    background: linear-gradient(135deg, #fff8df, #ffffff);
+    border: 3px solid #f0c419; border-radius: 20px; padding: 18px 24px; text-align: center; margin-bottom: 20px; box-shadow: 0 6px 20px rgba(240, 196, 25, 0.2);
+}
+.selected-grade-display-box h2, .selected-grade-display-box h3 { color: #b71c1c; font-weight: 800; margin: 0; }
+
+.lesson-yt-bar {
+    background: #ffffff; border: 2px solid #ffcccc; border-radius: 18px;
+    padding: 14px 20px; margin-bottom: 22px;
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+    box-shadow: 0 5px 16px rgba(183, 28, 28, 0.06);
+}
+
+.content-box { background: white; border-radius: 22px; padding: 25px; box-shadow: 0 8px 25px rgba(0,0,0,.06); margin-bottom: 25px; }
+.question-number { font-weight: bold; color: #b71c1c; margin-bottom: 12px; font-size: 18px; }
+#questionText { text-align: right; font-size: 20px; line-height: 1.8; margin-bottom: 20px; color: #222; }
+
+.answer-box { margin-top: 18px; }
+.progress-wrap { margin-top: 20px; }
+.progress-bar { height: 12px; background: #eee; border-radius: 20px; overflow: hidden; }
+.progress-fill { height: 100%; width: 0%; background: #d32f2f; transition: .3s; }
+.hint-box { margin-top: 15px; padding: 15px; background: #fff4c2; border-right: 5px solid #d32f2f; border-radius: 12px; line-height: 1.8; font-size: 15px; text-align: right; }
+.hint-step-item { background: #fffdf5; border: 1px solid #ffe082; border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; }
+
+.training-grid { display: grid; grid-template-columns: 1.15fr 1fr; gap: 24px; }
+.ai-chat-box { background: white; border-radius: 22px; padding: 20px; box-shadow: 0 8px 25px rgba(0,0,0,.08); }
+.chat-messages { height: 320px; overflow-y: auto; padding: 16px; margin-bottom: 12px; background: #fff9e8; border-radius: 18px; }
+.message { padding: 12px 16px; border-radius: 16px; margin-bottom: 12px; max-width: 88%; line-height: 1.8; white-space: pre-wrap; }
+.message.student { background: #ffe082; margin-right: auto; }
+.message.ai { background: #f1f1f1; margin-left: auto; }
+.message img { max-width: 100%; max-height: 200px; border-radius: 12px; display: block; margin-bottom: 8px; border: 1px solid #ddd; }
+.chat-input-row { display: flex; gap: 10px; align-items: stretch; }
+.chat-input { flex: 1; min-height: 56px; resize: none; }
+
+.ai-img-preview-bar {
+    display: none; align-items: center; justify-content: space-between; gap: 10px;
+    background: #fff8df; border: 1.5px solid #f0c419; border-radius: 12px;
+    padding: 8px 12px; margin-bottom: 10px; font-size: 13px;
+}
+.ai-img-preview-bar img { width: 48px; height: 48px; object-fit: cover; border-radius: 8px; }
+
+.modal-backdrop {
+    position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 6000;
+    display: none; align-items: center; justify-content: center; padding: 20px;
+}
+.modal-backdrop.show { display: flex; }
+.modal-card {
+    background: white; width: 100%; max-width: 520px; border-radius: 24px;
+    padding: 25px; box-shadow: 0 18px 45px rgba(0,0,0,.25); border-top: 6px solid #f0c419;
+}
+.quick-issues { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+.issue-chip {
+    background: #fff8df; border: 1.5px solid #f0c419; color: #5d4000;
+    padding: 8px 12px; border-radius: 20px; font-size: 13px; font-weight: bold; cursor: pointer;
+}
+.issue-chip.active { background: #b71c1c; color: white; border-color: #b71c1c; }
+
+.teacher-chat-section {
+    background: white; border-radius: 22px; padding: 22px;
+    box-shadow: 0 8px 25px rgba(0,0,0,.07); margin-top: 25px; border-top: 5px solid #2e7d32;
+}
+.subject-chat-tabs {
+    display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px;
+}
+.subject-tab-btn {
+    border: 2px solid #e0e0e0; background: #fafafa; color: #444;
+    padding: 8px 14px; border-radius: 14px; font-size: 13px; font-weight: bold; cursor: pointer; transition: .2s;
+}
+.subject-tab-btn.active {
+    background: #2e7d32; color: white; border-color: #2e7d32;
+}
+.wa-chat-box {
+    background: #efeae2; border-radius: 18px; padding: 16px;
+    height: 330px; overflow-y: auto; margin: 14px 0; border: 1px solid #ddd;
+}
+.wa-msg {
+    max-width: 82%; padding: 10px 14px; border-radius: 14px;
+    margin-bottom: 10px; line-height: 1.7; position: relative; font-size: 14px;
+}
+.wa-msg.me {
+    background: #d9fdd3; margin-right: auto; border-top-right-radius: 4px;
+    box-shadow: 0 1px 2px rgba(0,0,0,.08);
+}
+.wa-msg.teacher {
+    background: #ffffff; margin-left: auto; border-top-left-radius: 4px;
+    box-shadow: 0 1px 2px rgba(0,0,0,.08);
+}
+.wa-meta {
+    display: flex; justify-content: space-between; align-items: center; gap: 10px;
+    font-size: 11px; color: #667781; margin-top: 5px;
+}
+.wa-attached-q {
+    background: rgba(0,0,0,.05); border-right: 3px solid #2e7d32;
+    padding: 6px 10px; border-radius: 8px; font-size: 12px; margin-bottom: 6px; color: #222;
+}
+
+.assignment-card {
+    background: #fffdf5; border: 2px solid #ffe082; border-radius: 16px;
+    padding: 16px; margin-bottom: 14px;
+}
+.assignment-card h4 { color: #b71c1c; margin-bottom: 6px; }
+.assignment-meta { font-size: 12px; color: #666; margin-bottom: 10px; }
+
+.footer { text-align: center; padding: 20px; color: #777; font-size: 14px; }
+.hidden { display: none !important; }
+
+@media(max-width: 900px) { .training-grid { grid-template-columns: 1fr; } }
+@media(max-width: 800px) { .cards { grid-template-columns: 1fr; } }
+@media(max-width: 600px) { .chat-input-row { flex-direction: column; } .chat-messages { height: 270px; } }
+</style>
+</head>
+<body class="locked">
+
+<!-- بوابة التسجيل والدخول -->
+<div id="studentAccessGate" class="student-access-gate">
+    <div class="access-card">
+        <div class="access-logo">🎒</div>
+        <h1>Mind AI</h1>
+        <p>منصة الصف الرابع الأساسي الشاملة لجميع كتب المنهاج الوزاري. يرجى إدخال بياناتك أو بياناتكما:</p>
+
+        <div class="form-step">
+            <label>المدرسة</label>
+            <select id="regSchool" class="input">
+                <option value="">-- اختر المدرسة --</option>
+                <option value="مدرسة الأمل الأساسية المختلطة">مدرسة الأمل الأساسية المختلطة</option>
+                <option value="مدرسة التفوق النموذجية">مدرسة التفوق النموذجية</option>
+                <option value="مدرسة الملك عبد الله الثاني للتميز">مدرسة الملك عبد الله الثاني للتميز</option>
+            </select>
+        </div>
+
+        <div class="form-step">
+            <label>الصف الدراسي</label>
+            <input type="text" class="input" value="الصف الرابع الأساسي" disabled style="background:#f8f9fa; font-weight:bold; color:#b71c1c;">
+        </div>
+
+        <div class="form-step">
+            <label>الشعبة</label>
+            <select id="regSection" class="input">
+                <option value="">-- اختر الشعبة --</option>
+                <option value="أ">الشعبة أ</option>
+                <option value="ب">الشعبة ب</option>
+                <option value="ج">الشعبة ج</option>
+                <option value="د">الشعبة د</option>
+            </select>
+        </div>
+
+        <div class="form-step">
+            <label>اسم الطالب الثلاثي (أو اسمي الطالبين)</label>
+            <input id="regName" class="input" type="text" placeholder="الاسم الثلاثي">
+        </div>
+
+        <button class="btn btn-primary full-btn" style="margin-top:10px;" onclick="registerNewStudent()">دخول إلى المنصة</button>
+        <div id="accessError" class="access-error">❌ يرجى إكمال إدخال بيانات المدرسة والشعبة واسم الطالب.</div>
+    </div>
+</div>
+
+<!-- القائمة الجانبية -->
+<button class="menu-button" onclick="toggleMenu()" aria-label="القائمة">☰</button>
+<div id="menuOverlay" class="menu-overlay" onclick="closeMenu()"></div>
+<aside id="sideMenu" class="side-menu">
+    <div class="menu-title">🎒 Mind AI</div>
+    <button class="menu-item" onclick="goHomeFromMenu()">🏠 <span>الصفحة الرئيسية (اختيار المادة)</span></button>
+    <button class="menu-item" style="background:#ffebee; border-right-color:#b71c1c; color:#b71c1c;" onclick="logoutStudent()">🚪 <span>تسجيل خروج</span></button>
+    <button class="btn btn-light full-btn menu-close" onclick="closeMenu()">إغلاق القائمة</button>
+</aside>
+
+<div class="container">
+<header class="header">
+    <div class="header-box">
+        <div class="logo">
+            <div class="logo-icon">🎒</div>
+            <div class="logo-text">
+                <strong>Mind AI</strong>
+                <span>منصة المناهج الوزارية الشاملة (الرابع الأساسي)</span>
+            </div>
+        </div>
+        <div class="header-badge" id="studentBadgeName">👨🏻‍🎓 الطالب</div>
+    </div>
+</header>
+
+<section class="section">
+    <div class="selected-grade-display-box">
+        <h2 id="heroSelectedGradeTitle">🎓 مدرسة الأمل الأساسية المختلطة | الصف الرابع الأساسي - أ</h2>
+    </div>
+</section>
+
+<!-- الواجهة 1: المواد الأربعة الكاملة -->
+<section id="subjectsView" class="section app-view show">
+    <div class="content-box" style="text-align:center; margin-bottom:20px;">
+        <h2 style="color:#b71c1c; margin:0;">اختر المادة الدراسية (الفصل الأول الكامل) 📚</h2>
+    </div>
+    <div class="cards">
+        <div class="card" onclick="openSubjectUnits('math')">
+            <div>
+                <div class="card-icon">🔢</div>
+                <h3>كتاب الرياضيات (المنهاج الوزاري)</h3>
+                <p>الأعداد وجمعها وطرحها، الضرب، القسمة، وخصائص الأعداد.</p>
+            </div>
+            <button class="btn btn-primary full-btn">فتح وحدات الرياضيات</button>
+        </div>
+        <div class="card" onclick="openSubjectUnits('science')">
+            <div>
+                <div class="card-icon">🧪</div>
+                <h3>كتاب العلوم (المنهاج الوزاري)</h3>
+                <p>خصائص المواد وتغيراتها، والنظام البيئي وتكيّف الكائنات الحية.</p>
+            </div>
+            <button class="btn btn-primary full-btn">فتح وحدات العلوم</button>
+        </div>
+        <div class="card" onclick="openSubjectUnits('arabic')">
+            <div>
+                <div class="card-icon">📖</div>
+                <h3>كتاب اللغة العربية (المنهاج الوزاري)</h3>
+                <p>القراءة والفهم والاستيعاب، الجملة الاسمية والفعلية، والإملاء.</p>
+            </div>
+            <button class="btn btn-yellow full-btn">فتح وحدات العربية</button>
+        </div>
+        <div class="card" onclick="openSubjectUnits('english')">
+            <div>
+                <div class="card-icon">🔤</div>
+                <h3>كتاب اللغة الإنجليزية (Action Pack)</h3>
+                <p>Daily Routines، Present Simple، Places، وPrepositions.</p>
+            </div>
+            <button class="btn btn-yellow full-btn">فتح وحدات الإنجليزية</button>
+        </div>
+    </div>
+</section>
+
+<!-- الواجهة 2: الوحدات -->
+<section id="unitsView" class="section app-view">
+    <div style="margin-bottom: 15px;">
+        <button class="btn btn-light" style="width: auto; padding: 10px 20px;" onclick="goBackToSubjects()">⬅ رجوع لاختيار المواد</button>
+    </div>
+    <div class="content-box" style="text-align:center; margin-bottom:20px;">
+        <h2 id="subjectHeaderTitle" style="color:#b71c1c; margin-bottom:8px;">وحدات المادة</h2>
+        <p style="color:#666;">اختر الوحدة الدراسية لعرض كافة دروسها:</p>
+    </div>
+    <div id="unitsContainer" class="cards"></div>
+</section>
+
+<!-- الواجهة 3: الدروس -->
+<section id="lessonsView" class="section app-view">
+    <div style="margin-bottom: 15px;">
+        <button class="btn btn-light" style="width: auto; padding: 10px 20px;" onclick="goBackToUnits()">⬅ رجوع لاختيار الوحدات</button>
+    </div>
+    <div class="content-box" style="text-align:center; margin-bottom:20px;">
+        <h2 id="unitTitleHeader" style="color:#b71c1c; margin-bottom:8px;">دروس الوحدة</h2>
+        <p style="color:#666;">اختر الدرس لبدء التدريبات ومشاهدة شرح الدرس على يوتيوب:</p>
+    </div>
+    <div id="lessonsContainer" class="cards"></div>
+</section>
+
+<!-- الواجهة 4: التدريبات والذكاء الاصطناعي وتواصل مع المعلم -->
+<section id="trainingAiView" class="section app-view">
+    <div style="margin-bottom: 15px;">
+        <button class="btn btn-light" style="width: auto; padding: 10px 20px;" onclick="goBackToLessons()">⬅ رجوع لاختيار الدروس</button>
+    </div>
+
+    <div class="selected-grade-display-box" style="background:#fff9e8; border-color:#d32f2f;">
+        <h3 id="currentLessonPathTitle" style="color:#b71c1c; font-size:18px; margin:0;">📚 المادة ⬅ الوحدة ⬅ الدرس</h3>
+    </div>
+
+    <!-- شريط رابط شرح الدرس على يوتيوب -->
+    <div class="lesson-yt-bar">
+        <div>
+            <strong style="color:#b71c1c; font-size:15px;">🎬 فيديو شرح الدرس على يوتيوب</strong>
+            <p style="color:#666; font-size:13px; margin-top:3px;">شاهدا شرح الدرس قبل الحل أو عند الحاجة لفهم الفكرة الأساسية.</p>
+        </div>
+        <a id="lessonYoutubeLink" href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer" class="btn btn-yt">
+            <span>▶ مشاهدة شرح الدرس على يوتيوب</span>
+        </a>
+    </div>
+
+    <div class="training-grid">
+        <div class="content-box">
+            <h3 style="color:#b71c1c; margin-bottom:15px; border-bottom:2px solid #eee; padding-bottom:10px;">📝 التدريبات الوزارية (10 أسئلة لكل درس • 5 تلميحات لكل سؤال)</h3>
+            <div id="questionNumber" class="question-number"></div>
+            <h3 id="questionText"></h3>
+            <div class="answer-box">
+                <label>اكتب محاولتك أو إجابتك (أو محاولتكما)</label>
+                <textarea id="studentAnswer" class="input" rows="4" placeholder="اكتب الإجابة هنا..."></textarea>
+            </div>
+            <div style="margin-top:15px; display:flex; gap:8px; flex-wrap:wrap;">
+                <button id="hintBtn" class="btn btn-yellow" onclick="handleHintClick()">💡 تلميح (0 / 5)</button>
+                <button class="btn btn-primary" onclick="saveAttempt()">إرسال الحل</button>
+                <button class="btn btn-light" onclick="nextQuestion()">التالي ⬅</button>
+            </div>
+            <div id="hintBox" class="hint-box" style="display:none;"></div>
+            <div class="progress-wrap">
+                <div class="progress-bar">
+                    <div id="progressFill" class="progress-fill"></div>
+                </div>
+                <p id="progressText" style="margin-top:8px; font-weight:bold;">السؤال 1 من 10</p>
+            </div>
+        </div>
+
+        <div class="ai-chat-box">
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:15px; border-bottom:2px solid #eee; padding-bottom:10px;">
+                <h3 id="studentPersonalAiHeading" style="color:#b71c1c; margin:0;">🤖 مساعد ذكي للطالب</h3>
+                <button type="button" class="btn btn-yellow" style="padding:7px 12px; font-size:13px;" onclick="triggerAiImagePicker()">📷 إرفاق صورة</button>
+                <input id="aiImageInput" type="file" accept="image/*" style="display:none;" onchange="handleAiImageSelected(event)">
+            </div>
+
+            <div id="aiImagePreviewBar" class="ai-img-preview-bar">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <img id="aiImageThumb" src="" alt="معاينة الصورة">
+                    <span id="aiImageName" style="font-weight:bold; color:#5d4000;">صورة مرفقة</span>
+                </div>
+                <button type="button" onclick="clearAiAttachedImage()" style="border:none; background:none; color:#b71c1c; font-weight:bold; cursor:pointer; font-size:15px;">✕</button>
+            </div>
+
+            <div id="chatMessages" class="chat-messages">
+                <div class="message ai">
+                    أهلاً بكما يا بطلي الصف الرابع 👋 أنا مساعدكما الذكي المعزز. أساعدكما على التفكير والتحليل خطوة بخطوة دون إعطاء الحل الجاهز مباشرة، ويمكنكما سؤالي أو إرفاق صورة لمسألة أو صفحة.
+                </div>
+            </div>
+            <div class="chat-input-row">
+                <textarea id="chatInput" class="input chat-input" placeholder="اسأل عن فكرة أو أرفق صورة..."></textarea>
+                <button id="sendChatBtn" class="btn btn-primary" onclick="sendMessage()">إرسال</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- تواصل مع المعلم: تظهر فقط داخل صفحة التدريبات وليست في الواجهة الرئيسية -->
+    <section id="teacherChatSection" class="teacher-chat-section">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+            <div>
+                <h3 style="color:#2e7d32; margin:0;">💬 تواصل مع المعلم</h3>
+                <p style="color:#666; font-size:13px; margin-top:4px;">محادثة مستقلة لكل مادة، ويمكنكما إرفاق السؤال الحالي مباشرة.</p>
+            </div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <button type="button" class="btn btn-yellow" style="padding:8px 14px; font-size:13px;" onclick="attachCurrentQuestionToChat()">📎 إرفاق السؤال الحالي</button>
+                <button type="button" class="btn btn-light" style="padding:8px 14px; font-size:13px;" onclick="loadTeacherChatMessages()">🔄 تحديث</button>
+            </div>
+        </div>
+
+        <div class="subject-chat-tabs" id="subjectChatTabs">
+            <button type="button" class="subject-tab-btn active" data-subj="math" onclick="selectChatSubject('math')">🔢 الرياضيات</button>
+            <button type="button" class="subject-tab-btn" data-subj="science" onclick="selectChatSubject('science')">🧪 العلوم</button>
+            <button type="button" class="subject-tab-btn" data-subj="arabic" onclick="selectChatSubject('arabic')">📖 اللغة العربية</button>
+            <button type="button" class="subject-tab-btn" data-subj="english" onclick="selectChatSubject('english')">🔤 اللغة الإنجليزية</button>
+        </div>
+
+        <div id="attachedQuestionPreview" style="display:none; background:#e8f5e9; border:1px solid #a5d6a7; color:#1b5e20; padding:10px 14px; border-radius:12px; margin-top:12px; font-size:13px;"></div>
+
+        <div id="waChatMessages" class="wa-chat-box"></div>
+
+        <div class="chat-input-row">
+            <textarea id="waChatInput" class="input chat-input" placeholder="اكتب رسالتك لمعلم المادة هنا..."></textarea>
+            <button type="button" class="btn btn-green" onclick="sendTeacherChatMessage()">إرسال</button>
+        </div>
+    </section>
+</section>
+
+<!-- صندوق استقبال الواجبات والكويزات المرسلة من صفحة المعلم -->
+<section id="teacherAssignmentsInbox" class="content-box" style="margin-top:25px; border-top:5px solid #f0c419;">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px;">
+        <h3 style="color:#b71c1c; margin:0;">📝 الواجبات والكويزات المرسلة من المعلم</h3>
+        <button type="button" class="btn btn-yellow" style="padding:8px 14px; font-size:13px;" onclick="loadAssignmentsFromTeacher()">🔄 تحديث</button>
+    </div>
+    <div id="studentReceivedAssignmentsList"></div>
+</section>
+
+<footer class="footer">
+    <p>Mind AI ©️ 2026</p>
+    <p>منصة الصف الرابع الأساسي الشاملة لجميع كتب المنهاج الوزاري (الفصل الأول الكامل) 🤖</p>
+</footer>
+</div>
+
+<!-- نافذة تسجيل مشكلة الطالب قبل عرض التلميحات -->
+<div id="issueModal" class="modal-backdrop">
+    <div class="modal-card">
+        <h3 style="color:#b71c1c; margin-bottom:8px;">🤔 ما هي المشكلة التي تواجهك أو تواجهكما في هذا السؤال؟</h3>
+        <p style="color:#666; font-size:14px; margin-bottom:10px;">
+            يجب تحديد سبب المشكلة أولاً ليتم حفظه في صفحة المعلم للتقييم، ثم نفتح التلميحات الخمس خطوة بخطوة.
+        </p>
+
+        <div class="quick-issues" id="quickIssuesContainer">
+            <button type="button" class="issue-chip" onclick="selectQuickIssue(this, 'لا أفهم المطلوب من السؤال')">لا أفهم المطلوب من السؤال</button>
+            <button type="button" class="issue-chip" onclick="selectQuickIssue(this, 'نسيت القاعدة أو القانون')">نسيت القاعدة أو القانون</button>
+            <button type="button" class="issue-chip" onclick="selectQuickIssue(this, 'أواجه صعوبة في الخطوة الأولى')">أواجه صعوبة في الخطوة الأولى</button>
+            <button type="button" class="issue-chip" onclick="selectQuickIssue(this, 'أخطأت في الحساب أو الإملاء أو القاعدة')">أخطأت في الحساب أو الإملاء أو القاعدة</button>
+        </div>
+
+        <div class="form-step" style="margin-top:10px;">
+            <label>وضّح المشكلة بكلماتك (اختياري إذا اخترت سبباً من الأعلى):</label>
+            <textarea id="studentIssueInput" class="input" rows="3" placeholder="مثال: لم أعرف كيف أبدأ بالخطوة الأولى أو أين أضع الرمز..."></textarea>
+        </div>
+
+        <div id="issueModalError" style="color:#b71c1c; font-size:13px; font-weight:bold; display:none; margin-bottom:10px;">
+            ❌ يرجى اختيار سبب للمشكلة أو كتابة وصف واضح لها قبل فتح التلميح.
+        </div>
+
+        <div style="display:flex; gap:10px; justify-content:flex-end;">
+            <button type="button" class="btn btn-light" onclick="closeIssueModal()">إلغاء</button>
+            <button type="button" class="btn btn-primary" onclick="submitIssueAndOpenHints()">حفظ المشكلة وفتح التلميح 💡</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const MAX_HINTS_PER_QUESTION = 5;
+const QUESTIONS_PER_LESSON = 10;
+
+const STORAGE_KEYS = {
+    session: "mindai_student_session",
+    hintLogs: "mindai_student_hint_logs",
+    attempts: "mindai_student_attempts",
+    aiLogs: "mindai_student_ai_logs",
+    messages: "mindai_wa_messages",
+    assignments: "mindai_teacher_assignments",
+    submissions: "mindai_student_assignment_submissions"
+};
+
+let currentStudent = null;
+let selectedSubjectKey = "";
+let selectedSubjectName = "";
+let activeChatSubjectKey = "math";
+let selectedUnitKey = "";
+let selectedUnitName = "";
+let selectedLessonTitle = "";
+let currentQuestions = [];
+let currentQuestionIndex = 0;
+let hintLevel = 0;
+let shownHintsList = [];
+let currentLessonObj = null;
+let selectedQuickIssueText = "";
+let questionIssueRecorded = {};
+let attachedQuestionTextForChat = "";
+let attachedAiImageDataUrl = "";
+let attachedAiImageName = "";
+
+function escapeHtml(str) {
+    return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+}
+
+function formatTimeArabic(isoString) {
+    try {
+        const d = new Date(isoString || Date.now());
+        return d.toLocaleTimeString("ar-JO", { hour: "2-digit", minute: "2-digit" });
+    } catch (_) {
+        return "";
+    }
+}
+
+function getSubjectArabicName(key) {
+    const map = {
+        math: "كتاب الرياضيات",
+        science: "كتاب العلوم",
+        arabic: "كتاب اللغة العربية",
+        english: "كتاب اللغة الإنجليزية"
+    };
+    return map[key] || "كتاب الرياضيات";
+}
+
+function getLessonYoutubeUrl(lessonObj, subjectName) {
+    if (lessonObj && lessonObj.youtubeUrl) {
+        return lessonObj.youtubeUrl;
+    }
+    const query = encodeURIComponent(`شرح ${lessonObj ? lessonObj.title : ""} ${subjectName} الصف الرابع المنهاج الأردني`);
+    return `https://www.youtube.com/results?search_query=${query}`;
+}
+
+function buildFiveHints(qObj) {
+    const baseHints = Array.isArray(qObj.hints) ? qObj.hints.filter(Boolean) : [];
+    const five = [...baseHints];
+
+    const fallbacks = [
+        "الخطوة 1: اقرأ السؤال بتمهّل وحدّد المعطيات والمطلوب بدقة.",
+        "الخطوة 2: تذكّر القاعدة أو المفهوم الأساسي المتعلق بهذا الدرس.",
+        "الخطوة 3: جرّب تطبيق القاعدة على الجزء الأول من السؤال.",
+        "الخطوة 4: راجع خطواتك وتحقق من صحة النتيجة أو الصياغة.",
+        `الخطوة 5 (توجيه ختامي): ركّز على: ${baseHints[baseHints.length - 1] || "مراجعة قاعدة الدرس"}.`
+    ];
+
+    let idx = 0;
+    while (five.length < MAX_HINTS_PER_QUESTION && idx < fallbacks.length) {
+        if (!five.includes(fallbacks[idx])) {
+            five.push(fallbacks[idx]);
+        }
+        idx++;
+    }
+    return five.slice(0, MAX_HINTS_PER_QUESTION);
+}
+
+function expandLessonToTenQuestions(lessonObj) {
+    const rawQs = Array.isArray(lessonObj.questions) ? lessonObj.questions : [];
+    const normalized = rawQs.map(item => ({
+        q: item.q,
+        hints: buildFiveHints(item)
+    }));
+
+    const topicTitle = lessonObj.title || "هذا الدرس";
+    let counter = normalized.length + 1;
+
+    while (normalized.length < QUESTIONS_PER_LESSON) {
+        const extraIndex = counter;
+        normalized.push({
+            q: `تدريب إضافي (${extraIndex}) حول «${topicTitle}»: طبّق قاعدة الدرس على مثال جديد واكتب خطوات تفكيرك بوضوح.`,
+            hints: buildFiveHints({
+                hints: [
+                    `حدّد الفكرة الأساسية في «${topicTitle}» قبل البدء`,
+                    "استخرج المعطيات من السؤال واكتب ما يطلبه بدقة",
+                    "اختر القاعدة أو الخطوة المناسبة لحل هذا النوع من الأسئلة",
+                    "نفّذ الحل خطوة بخطوة وانتبه للتفاصيل الصغيرة",
+                    "راجع إجابتك وتأكد أنها تجيب عن المطلوب كاملاً"
+                ]
+            })
+        });
+        counter++;
+    }
+
+    return normalized.slice(0, QUESTIONS_PER_LESSON);
+}
+
+async function syncToSupabase(tableName, payload) {
+    if (!window.supabaseClient) return;
+    try {
+        await window.supabaseClient.from(tableName).insert([payload]);
+    } catch (e) {
+        console.warn(`تعذر المزامنة مع جدول ${tableName} في Supabase:`, e.message || e);
+    }
+}
+
+function getStudentMeta() {
+    return {
+        student_id: currentStudent ? currentStudent.id : "st_guest",
+        student_name: currentStudent ? currentStudent.name : "طالب تجريبي",
+        school: currentStudent ? currentStudent.school : "مدرسة الأمل الأساسية المختلطة",
+        grade: currentStudent ? currentStudent.grade : "الصف الرابع الأساسي",
+        section: currentStudent ? currentStudent.section : "أ"
+    };
+}
+
+// ===== بيانات المنهاج الوزاري (الفصل الأول - المواد الأربعة) =====
+const ministryCurriculumData = {
+    math: {
+        name: "كتاب الرياضيات",
+        icon: "🔢",
+        units: {
+            mu1: {
+                name: "الوحدة الأولى: الأعداد وجمعها وطرحها",
+                lessons: [
+                    {
+                        title: "الدرس 1: القيمة المنزلية ضمن الملايين",
+                        youtubeUrl: "https://www.youtube.com/results?search_query=%D8%A7%D9%84%D9%82%D9%8A%D9%85%D8%A9+%D8%A7%D9%84%D9%85%D9%86%D8%B2%D9%84%D9%8A%D8%A9+%D8%B6%D9%85%D9%86+%D8%A7%D9%84%D9%85%D9%84%D8%A7%D9%8A%D9%8A%D9%86+%D8%B1%D8%A7%D8%A8%D8%B9+%D8%B1%D9%8A%D8%A7%D8%B6%D9%8A%D8%A7%D8%AA",
+                        questions: [
+                            { q: "اكتب العدد «خمسمائة وأربعة وعشرون ألفاً وثلاثمائة واثنا عشر» بالصيغة القياسية.", hints: ["قسّم العدد إلى دورات: الألوف والواحدات", "حدّد أرقام دورة الألوف (524)", "حدّد أرقام دورة الواحدات (312)", "اكتب الدورتين متجاورتين دون فراغات عشوائية", "ركّب العدد من اليسار إلى اليمين لتحصل على الصيغة القياسية"] },
+                            { q: "ما القيمة المنزلية للرقم 7 في العدد 7432000؟", hints: ["عدّ منازل العدد من اليمين إلى اليمين ثم إلى اليسار", "حدد موقع الرقم 7 بدقة", "الرقم 7 يقع في منزلة الملايين", "كم صفراً يوجد في المليون؟ ستة أصفار", "اكتب 7 متبوعاً بستة أصفار"] },
+                            { q: "اكتب العدد 80540 بالصيغة التحليلية.", hints: ["انظر إلى كل رقم لا يساوي صفراً", "احسب قيمة الرقم 8 في منزلة عشرات الألوف", "احسب قيمة الرقم 5 في المئات والرقم 4 في العشرات", "تجاهل الأصفار لأن قيمتها صفر", "اكتب القيم المنزلية للأرقام غير الصفرية وبينها إشارة جمع (+)"] },
+                            { q: "أي العددين أكبر: 45210 أم 45120؟", hints: ["ابدأ المقارنة من أعلى منزلة على اليسار", "قارن عشرات الألوف وآحاد الألوف في العددين", "عشرات الألوف وآحاد الألوف متساويتان", "انتقل إلى منزلة المئات وقارن الرقمين", "العدد الذي يملك رقماً أكبر في المئات هو الأكبر"] },
+                            { q: "ما العدد الذي يقل بمقدار 1000 عن العدد 84210؟", hints: ["عبارة «يقل بمقدار 1000» تعني طرح 1000", "حدد منزلة الألوف في العدد 84210", "ما الرقم الموجود في منزلة الألوف؟", "اطرح 1 من منزلة الألوف فقط", "أبقِ باقي المنازل كما هي بعد الطرح"] },
+                            { q: "اكتب العدد 125000 بالصيغة اللفظية.", hints: ["انظر إلى دورة الألوف في العدد", "ما العدد المكوّن من 1 و 2 و 5؟", "اقرأ 125 بالكلمات", "أضف اسم الدورة التي يقع فيها", "اكتب الصيغة اللفظية بوضوح ودون أخطاء إملائية"] },
+                            { q: "ما الرقم الواقع في منزلة مئات الألوف في العدد 6342100؟", hints: ["رتّب المنازل من اليمين: آحاد، عشرات، مئات...", "تابع إلى دورة الألوف: آحاد الألوف، عشرات الألوف، مئات الألوف", "حدد موقع كل رقم في العدد", "المئات 1، آحاد الألوف 2، عشرات الألوف 4", "انظر إلى المنزلة التي تلي عشرات الألوف مباشرة"] },
+                            { q: "رتّب الأعداد الآتية تصاعدياً: 12000، 9000، 15000.", hints: ["الترتيب التصاعدي يكون من الأصغر إلى الأكبر", "قارن عدد المنازل في كل عدد", "العدد المكوّن من 4 منازل أصغر من ذي الـ 5 منازل", "قارن بين العددين الباقيين في منزلة الألوف", "رتّب الأعداد الثلاثة من الأصغر إلى الأكبر"] },
+                            { q: "ما العدد السابق مباشرة للعدد 50000؟", hints: ["العدد السابق يعني العدد الذي يسبق مباشرة عند العد التنازلي", "اطرح 1 من 50000", "فكّر في العدد الذي إذا أضفت إليه 1 يصبح 50000", "تأكد من عدم وجود خطأ في الأصفار والتسعات", "اكتب الناتج مباشرة"] },
+                            { q: "ما العدد التالي مباشرة للعدد 99999؟", hints: ["العدد التالي يعني إضافة 1 إلى العدد المعطى", "أضف 1 إلى 99999", "ماذا يحدث عندما تتغير جميع التسعات؟", "تنتقل إلى منزلة جديدة أكبر", "اكتب العدد الناتج بعد إضافة 1"] }
+                        ]
+                    },
+                    {
+                        title: "الدرس 2: مقارنة الأعداد وترتيبها",
+                        youtubeUrl: "https://www.youtube.com/results?search_query=%D9%85%D9%82%D8%A7%D8%B1%D9%86%D8%A9+%D8%A7%D9%84%D8%A3%D8%B9%D8%AF%D8%A7%D8%AF+%D9%88%D8%AA%D8%B1%D8%AA%D9%8A%D8%A8%D9%87%D8%A7+%D8%B1%D8%A7%D8%A8%D8%B9+%D8%B1%D9%8A%D8%A7%D8%B6%D9%8A%D8%A7%D8%AA",
+                        questions: [
+                            { q: "ضع الرمز المناسب (> أو < أو =) في الفراغ: 98453 [...] 98543.", hints: ["قارن العددين منزلة منزلة من اليسار", "عشرات الألوف وآحاد الألوف متساويان", "قارن منزلة المئات في العددين", "في العدد الأول المئات 4 وفي الثاني 5", "فتحة الرمز تتجه دائماً نحو العدد الأكبر"] },
+                            { q: "رتّب الأعداد الآتية تصاعدياً: 4120، 4210، 4012.", hints: ["الترتيب التصاعدي من الأصغر إلى الأكبر", "منزلة الألوف متساوية في جميع الأعداد (4)", "قارن منزلة المئات في كل عدد", "رتّب الأعداد حسب قيمة المئات من الأصغر للأكبر", "اكتب الترتيب النهائي من اليمين إلى اليسار"] },
+                            { q: "رتّب الأعداد الآتية تنازلياً: 73100، 73900، 73500.", hints: ["الترتيب التنازلي من الأكبر إلى الأصغر", "الألوف متساوية في الأعداد الثلاثة", "قارن المئات: 100، 900، 500", "ابدأ بالعدد الذي يملك أكبر قيمة في المئات", "أنهِ بالعدد الأصغر"] },
+                            { q: "ضع الرمز المناسب (> أو < أو =) في الفراغ: 60400 [...] 60400.", hints: ["قارن كل منزلة في العدد الأول مع نظيرتها في الثاني", "هل هناك اختلاف في أي منزلة؟", "العددان لهما القيمة نفسها تماماً", "اختر رمز المساواة", "اكتب الرمز (=)"] },
+                            { q: "أي الأعداد الآتية هو الأكبر: 51200 أم 52100 أم 50900؟", hints: ["قارن عشرات الألوف أولاً", "انتقل إلى منزلة آحاد الألوف", "قارن الأرقام: 1، 2، 0", "أيها الأكبر في منزلة آحاد الألوف؟", "اختر العدد الكامل المقابل لذلك الرقم"] },
+                            { q: "أي الأعداد الآتية هو الأصغر: 34800 أم 34080 أم 34880؟", hints: ["قارن المنازل من اليسار إلى اليمين", "عشرات الألوف وآحاد الألوف متساوية", "قارن منزلة المئات في الأعداد الثلاثة", "ابحث عن أصغر رقم في منزلة المئات", "العدد الذي يملك 0 في المئات هو الأصغر"] },
+                            { q: "أكمل بعدد مناسب ليكون صحيحاً: 25600 < [...].", hints: ["الرمز (<) يعني أن العدد في الفراغ أكبر من 25600", "فكّر في زيادة المئات أو الألوف", "جرّب إضافة 100 أو 1000 إلى 25600", "تأكد أن العدد الجديد أكبر بوضوح", "اكتب عدداً صحيحاً يحقق المتباينة"] },
+                            { q: "أكمل بعدد مناسب ليكون صحيحاً: 81250 > [...].", hints: ["الرمز (>) يعني أن العدد في الفراغ أصغر من 81250", "فكّر في عدد يقل عنه في المئات أو الألوف", "جرّب طرح 250 أو 1250 من 81250", "تحقّق من صحة المقارنة", "اكتب عدداً أصغر من 81250"] },
+                            { q: "إذا كان عدد زوار معرض في اليوم الأول 18400 وفي اليوم الثاني 18450، فأي اليومين أكثر زواراً؟", hints: ["قارن العددين 18400 و 18450", "الألوف والمئات متساوية في اليومين", "انظر إلى منزلة العشرات في كل عدد", "قارن بين 0 عشرات و 5 عشرات", "حدّد اليوم الذي يملك العدد الأكبر"] },
+                            { q: "ما أهمية ترتيب الأعداد من الأصغر إلى الأكبر في حياتنا اليومية؟", hints: ["فكّر في مقارنة الأسعار أو الأطوال أو الأوزان", "كيف يساعدك الترتيب على اتخاذ قرار أسرع؟", "يوضح الفروق بين القيم بسهولة", "اربط إجابتك بمثال من حياتك", "لّخص الفائدة في جملة واضحة"] }
+                        ]
+                    },
+                    {
+                        title: "الدرس 3: تقريب الأعداد إلى أقرب ألف وعشرة آلاف ومئة ألف",
+                        youtubeUrl: "https://www.youtube.com/results?search_query=%D8%AA%D9%82%D8%B1%D9%8A%D8%A8+%D8%A7%D9%84%D8%A3%D8%B9%D8%AF%D8%A7%D8%AF+%D8%B1%D8%A7%D8%A8%D8%B9+%D8%B1%D9%8A%D8%A7%D8%B6%D9%8A%D8%A7%D8%AA",
+                        questions: [
+                            { q: "قرّب العدد 4620 إلى أقرب ألف.", hints: ["حدّد منزلة الألوف في العدد", "انظر إلى الرقم الواقع على يمين منزلة الألوف (المئات)", "هل الرقم في المئات 5 أو أكثر أم أقل من 5؟", "المئات 6 إذن نضيف 1 إلى الألوف", "حوّل المنازل التي على يمين الألوف إلى أصفار"] }
+                        ]
+                    }
+                ]
+            },
+            mu2: {
+                name: "الوحدة الثانية: جمع الأعداد وطرحها",
+                lessons: [
+                    {
+                        title: "الدرس 1: جمع الأعداد ضمن الملايين",
+                        youtubeUrl: "https://www.youtube.com/results?search_query=%D8%AC%D9%85%D8%B9+%D8%A7%D9%84%D8%A3%D8%B9%D8%AF%D8%A7%D8%AF+%D8%B6%D9%85%D9%86+%D8%A7%D9%84%D9%85%D9%84%D8%A7%D9%8A%D9%8A%D9%86+%D8%B1%D8%A7%D8%A8%D8%B9+%D8%B1%D9%8A%D8%A7%D8%B6%D9%8A%D8%A7%D8%AA",
+                        questions: [
+                            { q: "جد ناتج الجمع: 32410 + 14250.", hints: ["رتّب المنازل المتشابهة بعضها تحت بعض", "ابدأ الجمع من منزلة الآحاد", "اجمع العشرات والمئات ثم الألوف", "انتبه إن وُجدت إعادة تجميع", "اجمع كل منزلة بدقة للوصول للناتج النهائي"] },
+                            { q: "جد ناتج الجمع مع إعادة التجميع: 46780 + 25430.", hints: ["ابدأ من الآحاد (0 + 0)", "اجمع العشرات (8 + 3) ولا تنسَ الحمل", "اجمع المئات مع الرقم المحمول من العشرات", "تابع الجمع في منزلة الألوف وعشرات الألوف", "تحقق من صحة الجمع بتقدير الناتج"] },
+                            { q: "قدّر ناتج الجمع بتقريب العددين إلى أقرب ألف: 18720 + 31240.", hints: ["قرّب العدد الأول إلى أقرب ألف (انظر إلى المئات)", "قرّب العدد الثاني إلى أقرب ألف (انظر إلى المئات)", "18720 يقرب إلى 19000", "31240 يقرب إلى 31000", "اجمع العددين المقربين معاً"] },
+                            { q: "ما العنصر المحايد في عملية الجمع؟", hints: ["ما العدد الذي إذا أضفته إلى أي عدد لا يغيّر قيمته؟", "جرّب إضافة 0 إلى 25", "هل تغيّرت النتيجة؟", "تذكّر القاعدة الأساسية للجمع", "العدد هو الصفر (0)"] },
+                            { q: "ما الخاصية الموضحة في الجملة: 12500 + 8400 = 8400 + 12500؟", hints: ["لاحظ ترتيب العددين في الطرفين", "هل تغيّر الناتج عند تبديل مكان العددين؟", "تبديل ترتيب المضافين لا يغيّر ناتج الجمع", "تُسمى هذه الخاصية في الرياضيات خاصية التبديل", "اكتب اسم الخاصية بدقة"] },
+                            { q: "أكمل العدد الناقص: 45000 + [...] = 45000.", hints: ["الناتج مساوٍ للعدد الأول تماماً", "ما الذي أُضيف إلى 45000 دون أن يزيده؟", "تذكّر العنصر المحايد الجمعي", "العدد المفقود هو 0", "اكتب 0 في الفراغ"] },
+                            { q: "جد ناتج الجمع: 100000 + 250000.", hints: ["لاحظ أن الأصفار كثيرة في العددين", "اجمع الأعداد غير الصفرية في دورة الألوف (100 + 250)", "أبقِ الأصفار الثلاثة لليد اليمنى", "350 ألفاً تكتب بالأرقام بوضوح", "تحقّق من عدد الأصفار في الناتج"] },
+                            { q: "اشترى متجر في الشهر الأول 14200 قطعة وفي الشهر الثاني 16800 قطعة. ما مجموع القطع في الشهرين؟", hints: ["كلمة «مجموع» تدل على عملية الجمع", "اجمع 14200 و 16800", "اجمع الآحاد والعشرات والمئات أولاً (200 + 800 = 1000)", "أضف الألف الناتجة إلى الألوف", "اكتب المجموع الكلي للقطع"] },
+                            { q: "ما الخاصية الموضحة في: (10 + 20) + 30 = 10 + (20 + 30)؟", hints: ["لاحظ وجود الأقواس في الطرفين", "هل تغيّر ترتيب الأعداد أم طريقة تجميعها؟", "تجميع الحدود بأقواس بطرق مختلفة لا يغيّر الناتج", "تُسمى هذه الخاصية خاصية التجميع", "اكتب اسم الخاصية"] },
+                            { q: "لماذا نرتّب المنازل عمودياً عند جمع أعداد كبيرة؟", hints: ["ماذا يحدث لو جمعنا آحاداً مع عشرات عن طريق الخطأ؟", "ترتيب المنازل يحفظ القيمة المكانية لكل رقم", "يمنع أخطاء الحمل وإعادة التجميع", "يجعل الحساب منظماً وسهل المراجعة", "لّخص السبب في جملة واضحة"] }
+                        ]
+                    },
+                    {
+                        title: "الدرس 2: طرح الأعداد ضمن الملايين",
+                        youtubeUrl: "https://www.youtube.com/results?search_query=%D8%B7%D8%B1%D8%AD+%D8%A7%D9%84%D8%A3%D8%B9%D8%AF%D8%A7%D8%AF+%D8%B6%D9%85%D9%86+%D8%A7%D9%84%D9%85%D9%84%D8%A7%D9%8A%D9%8A%D9%86+%D8%B1%D8%A7%D8%A8%D8%B9+%D8%B1%D9%8A%D8%A7%D8%B6%D9%8A%D8%A7%D8%AA",
+                        questions: [
+                            { q: "جد ناتج الطرح: 58640 - 23410.", hints: ["رتّب المنازل عمودياً بدقة", "اطرح الآحاد ثم العشرات ثم المئات", "اطرح الألوف وعشرات الألوف", "هل احتجت إلى استلاف؟", "اكتب الناتج وتحقق منه بالجمع"] }
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    science: {
+        name: "كتاب العلوم",
+        icon: "🧪",
+        units: {
+            su1: {
+                name: "الوحدة الأولى: خصائص المادة وتغيراتها",
+                lessons: [
+                    {
+                        title: "الدرس 1: حالات المادة وتغيراتها",
+                        youtubeUrl: "https://www.youtube.com/results?search_query=%D8%AD%D8%A7%D9%84%D8%A7%D8%AA+%D8%A7%D9%84%D9%85%D8%A7%D8%AF%D8%A9+%D8%B1%D8%A7%D8%A8%D8%B9+%D8%B9%D9%84%D9%88%D9%85",
+                        questions: [
+                            { q: "ما الحالات الثلاث الشائعة للمادة؟", hints: ["فكّر في الماء كيف يوجد حولنا: جليد، ماء، بخار", "النوع الأول له شكل وحجم ثابتان", "النوع الثاني يأخذ شكل الوعاء وله حجم ثابت", "النوع الثالث ليس له شكل ثابت ولا حجم ثابت", "اذكر الحالات الثلاث بترتيب واضح"] },
+                            { q: "بماذا تتميز المادة الصلبة من حيث الشكل والحجم؟", hints: ["تخيل قطعة خشب أو مكعب ثلج", "هل يتغير شكلها عند نقلها من كوب إلى صحن؟", "هل يتغير حجمها؟", "جسيماتها متراصة ومتماسكة جداً", "صِف ثبات الشكل والحجم في إجابتك"] },
+                            { q: "كيف يسلك السائل عند سكبه في أوعية مختلفة؟", hints: ["تخيل سكب الحليب في كوب طويل ثم في وعاء واسع", "هل يبقى شكله ثابتاً؟", "يأخذ شكل الوعاء الذي يوضع فيه", "ماذا عن حجمه؟ يبقى ثابتاً", "اجمع بين تغير الشكل وثبات الحجم"] },
+                            { q: "لماذا ينتشر الغاز لملء الوعاء المغلق بالكامل؟", hints: ["فكّر في الهواء داخل البالون", "كيف تكون المسافات بين جسيمات الغاز؟", "المسافات كبيرة جداً وحركتها سريعة", "لذلك ينتشر ليشغل كامل الحيز المتاح", "اربط حركة الجسيمات وتباعدها بالانتشار"] },
+                            { q: "صنّف المواد الآتية إلى صلبة أو سائلة أو غازية: (الماء، الخشب، الهواء).", hints: ["حدد حالة كل مادة على حدة", "الخشب جسم متماسك ذو شكل ثابت", "الماء يجري ويأخذ شكل الوعاء", "الهواء غاز يملأ المكان", "اكتب تصنيف كل مادة بوضوح"] },
+                            { q: "ما المقصود بالتبخر؟", hints: ["ماذا يحدث للماء عند تسخينه أو تركه مكشوفاً؟", "يكتسب طاقة حرارية", "تتباعد جسيماته أكثر", "يتحول من الحالة السائلة إلى الغازية", "عرّف التبخر بعبارة علمية دقيقة"] },
+                            { q: "ماذا يحدث للماء عند وضعه في مُجمد الثلاجة؟", hints: ["تنخفض درجة حرارته", "يفقد طاقة حرارية بالتبريد", "تتقارب جسيماته وتقل حركتها", "يتحول إلى جليد صلب", "اذكر اسم العملية والنتيجة"] },
+                            { q: "ما الفرق بين الانصهار والتجمد؟", hints: ["قارن بين حالتي البداية والنهاية في كل عملية", "الانصهار تحوّل من صلب إلى سائل بالحرارة", "التجمد تحوّل من سائل إلى صلب بالتبريد", "هل هما عمليتان متعاكستان؟ نعم", "وضّح الفرق باختصار ودقة"] },
+                            { q: "ما اسم العملية التي يتحول فيها بخار الماء إلى قطرات ماء سائلة؟", hints: ["تذكّر قطرات الماء خارج كوب بارد", "يبرد بخار الماء عند ملامسة سطح بارد", "يفقد حرارة ويعود سائلاً", "ما المصطلح العلمي لهذه العملية؟", "اكتب اسم العملية"] },
+                            { q: "لماذا نحتاج إلى قياس الكتلة والحجم لوصف المادة بدقة؟", hints: ["ماذا تقيس الكتلة؟ مقدار ما في الجسم من مادة", "ماذا يقيس الحجم؟ مقدار الحيز الذي يشغله الجسم", "هل يمكن أن يكون لجسمين الحجم نفسه وتختلف كتلتهما؟ نعم", "لذلك نحتاج إليهما معاً لوصف المادة بدقة", "لّخص السبب في جملة واضحة"] }
+                        ]
+                    }
+                ]
+            },
+            su2: {
+                name: "الوحدة الثانية: النظام البيئي وتكيّف الكائنات الحية",
+                lessons: [
+                    {
+                        title: "الدرس 1: التكيف في الكائنات الحية",
+                        youtubeUrl: "https://www.youtube.com/results?search_query=%D8%A7%D9%84%D8%AA%D9%83%D9%8A%D9%81+%D9%81%D9%8A+%D8%A7%D9%84%D9%83%D8%A7%D8%A6%D9%86%D8%A7%D8%AA+%D8%A7%D9%84%D8%AD%D9%8A%D8%A9+%D8%B1%D8%A7%D8%A8%D8%B9+%D8%B9%D9%84%D9%88%D9%85",
+                        questions: [
+                            { q: "ما المقصود بالتكيف في الكائنات الحية؟", hints: ["كيف تبقى الحيوانات والنباتات حية في بيئاتها؟", "تساعدها خصائص أو سلوكيات معينة على البقاء", "يساعدها على الحصول على الغذاء والماء وتجنب الخطر", "يرتبط بالعيش في بيئة محددة", "عرّف التكيف بأسلوب واضح"] },
+                            { q: "ما الفرق بين التكيف التركيبي والتكيف السلوكي؟", hints: ["قارن بين جزء في الجسم وبين سلوك يقوم به الكائن", "التركيبي صفة في جسم الكائن مثل الريش أو الخياشيم", "السلوكي نشاط أو تصرف يقوم به مثل الهجرة أو الاختباء", "كل منهما يساعد على البقاء", "وضّح الفرق بين النوعين"] },
+                            { q: "صنّف: وجود الخياشيم عند السمك (تكيف تركيبي أم سلوكي)؟", hints: ["هل الخياشيم جزء من تركيب جسم السمك؟", "تساعده على التنفس تحت الماء", "لا يختارها بسلوك مؤقت بل هي جزء من جسمه", "إذن هي تكيف تركيبي", "اكتب النوع الصحيح"] },
+                            { q: "صنّف: هجرة بعض الطيور بحثاً عن الدفء (تكيف تركيبي أم سلوكي)؟", hints: ["هل الهجرة جزء من شكل الجسم أم حركة وسلوك؟", "يقوم بها الطائر استجابة لتغير الفصول", "تساعده على البقاء والبحث عن الغذاء", "إذن هي تكيف سلوكي", "اكتب النوع الصحيح"] },
+                            { q: "كيف يساعد الفراء السميك بعض الحيوانات التي تعيش في المناطق الباردة؟", hints: ["فكّر في الدب القطبي أو الثعلب القطبي", "ماذا يفعل الفراء الكثيف بالحرارة؟", "يحتفظ بدفء الجسم ويحميه من البرد الشديد", "يساعده على البقاء في بيئة متجمدة", "اشرح الفائدة بوضوح"] },
+                            { q: "كيف تتكيف نباتات الصحراء مع قلة الماء؟", hints: ["تذكّر الصبار أو نباتات البيئة الجافة", "هل أوراقها عريضة جداً أم صغيرة أو شوكية؟", "تقلل فقدان الماء وتخزّنه في سيقانها أو جذورها العميقة", "يساعدها ذلك على تحمل الجفاف", "اذكر طريقة واحدة أو أكثر للتكيف"] },
+                            { q: "ما أهمية الخف أو القدم العريضة لبعض الحيوانات في الرمال أو الثلج؟", hints: ["تخيل المشي على رمال ناعمة أو ثلج", "هل تغوص القدم الصغيرة بسهولة؟", "السطح الأوسع يوزع الوزن فلا يغوص الحيوان بسهولة", "يسهّل الحركة والسير", "وضّح الفائدة في جملة"] },
+                            { q: "لماذا تختبئ بعض الحيوانات الصحراوية في الجحور نهاراً؟", hints: ["كيف يكون الجو في الصحراء وقت الظهيرة؟", "تكون درجة الحرارة مرتفعة جداً", "الجحر يوفر مكاناً أبرد وأكثر أماناً", "يساعدها على تجنب الحر وفقدان الماء", "اكتب السبب بوضوح"] },
+                            { q: "ما المقصود بالنظام البيئي؟", hints: ["مما يتكون المكان الذي تعيش فيه الكائنات الحية؟", "يجمع بين الكائنات الحية والمكونات غير الحية", "مثل الماء والهواء والتربة والضوء", "تتفاعل هذه العناصر معاً باستمرار", "عرّف النظام البيئي ببساطة"] },
+                            { q: "ماذا يحدث لكائن حي إذا تغيرت بيئته ولم يستطع التكيف معها؟", hints: ["فكّر في حاجة الكائن للغذاء والماء والمأوى المناسب", "إذا لم يجد ما يناسب بقاءه قد يواجه خطراً كبيراً", "قد يضطر للانتقال أو يتعرض للانقراض في تلك البيئة", "التكيف ضروري لاستمرار الحياة", "أجب بوضوح"] }
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    arabic: {
+        name: "كتاب اللغة العربية",
+        icon: "📖",
+        units: {
+            au1: {
+                name: "الوحدة الأولى: القراءة والفهم والاستيعاب",
+                lessons: [
+                    {
+                        title: "الدرس 1: القراءة التفسيرية واستخراج الفكرة الرئيسة",
+                        youtubeUrl: "https://www.youtube.com/results?search_query=%D8%A7%D8%B3%D8%AA%D8%AE%D8%B1%D8%A7%D8%AC+%D8%A7%D9%84%D9%81%D9%83%D8%B1%D8%A9+%D8%A7%D9%84%D8%B1%D8%A6%D9%8A%D8%B3%D8%A9+%D8%B1%D8%A7%D8%A8%D8%B9+%D8%B9%D8%B1%D8%A8%D9%8A",
+                        questions: [
+                            { q: "كيف نحدّد الفكرة الرئيسة لفقرة قرائية؟", hints: ["اقرأ الفقرة كاملة بتركيز", "اسأل: عما تتحدث الفقرة بشكل عام؟", "ابحث عن المعنى الشامل الذي يربط جملها", "ميّزها عن التفاصيل والأمثلة الفرعية", "صِغ الفكرة الرئيسة في عبارة جامعة"] },
+                            { q: "ما ضد كلمة «النشاط» في اللغة العربية؟", hints: ["فكّر في عكس الحيوية والعمل", "من لا يعمل بنشاط يكون متباطئاً", "تذكّر الكلمة الشائعة المقابلة للنشاط", "هل هي الكسل؟", "اكتب الضد بدقة"] },
+                            { q: "ما ضد كلمة «الصدق»؟", hints: ["ما عكس قول الحقيقة؟", "الذي يخبر بغير الواقع يمارس الكذب", "تذكّر الضد المباشر", "تحقق من المعنى", "اكتب الضد"] },
+                            { q: "ما مرادف كلمة «المثابرة»؟", hints: ["فكّر في الاستمرار وعدم التوقف رغم الصعاب", "من يثابر يواصل جهده بصبر", "ما الكلمة القريبة في المعنى من المواظبة أو الاستمرار؟", "اختر مرادفاً واضحاً", "اكتب المرادف"] },
+                            { q: "كيف نفرّق بين الفكرة الرئيسة والفكرة الفرعية في النص؟", hints: ["قارن بين المعنى العام والمعنى الجزئي", "الرئيسة تشمل المحور الأساسي للفقرة", "الفرعية توضح تفصيلاً أو مثالاً معيناً", "الفرعية تخدم الفكرة الرئيسة", "وضّح الفرق في جملة واضحة"] },
+                            { q: "ما جمع كلمة «كتاب»؟ وما مفرد كلمة «مكتبات»؟", hints: ["اجمع كلمة «كتاب» جمعاً مناسباً", "جمعه: كتب", "حوّل «مكتبات» إلى المفرد", "مفردها: مكتبة", "اكتب الإجابتين معاً بوضوح"] },
+                            { q: "لماذا نحرص على فهم سياق الجملة عند استخراج معنى كلمة؟", hints: ["هل للكلمة نفسها دلالة واحدة في كل سياق؟", "السياق يبيّن المعنى المقصود بدقة", "يمنع الفهم الخاطئ للنص", "يساعد على اختيار المعنى الأنسب", "لّخص السبب باختصار"] },
+                            { q: "استخرج الفكرة العامة من العبارة: «بالقراءة ينمو العقل، وتتسع المدارك، ويزداد الإنسان معرفة».", hints: ["حدّد الكلمات المفتاحية في العبارة", "تتحدث عن أثر القراءة في الإنسان", "تربط القراءة بالعقل والمعرفة", "صغها في جملة مختصرة", "اكتب الفكرة العامة"] },
+                            { q: "ما ضد كلمة «النجاح»؟", hints: ["ما عكس الوصول إلى الهدف والنجاح؟", "تذكّر الكلمة المقابلة للنجاح في الدراسة أو العمل", "إنها الفشل", "تحقق من الكلمة", "اكتب الضد"] },
+                            { q: "ما فائدة قراءة النص قراءة متأنية قبل الإجابة عن الأسئلة؟", hints: ["فكّر في أثر التسرع عند القراءة", "التأني يساعد على فهم المعاني والتفاصيل", "يقلل الأخطاء عند الإجابة", "يجعل الفهم أعمق", "اذكر الفائدة بوضوح"] }
+                        ]
+                    }
+                ]
+            },
+            au2: {
+                name: "الوحدة الثانية: القواعد النحوية والإملاء",
+                lessons: [
+                    {
+                        title: "الدرس 1: الجملة الاسمية والجملة الفعلية",
+                        youtubeUrl: "https://www.youtube.com/results?search_query=%D8%A7%D9%84%D8%AC%D9%85%D9%84%D8%A9+%D8%A7%D9%84%D8%A7%D8%B3%D9%85%D9%8A%D8%A9+%D9%88%D8%A7%D9%84%D8%AC%D9%85%D9%84%D8%A9+%D8%A7%D9%84%D9%81%D8%B9%D9%84%D9%8A%D8%A9+%D8%B1%D8%A7%D8%A8%D8%B9+%D8%B9%D8%B1%D8%A8%D9%8A",
+                        questions: [
+                            { q: "بماذا تبدأ الجملة الاسمية؟ وما ركناها الأساسيان؟", hints: ["انظر إلى الكلمة الأولى في الجملة الاسمية", "تبدأ باسم", "تحتاج إلى ركنين أساسيين لتتم الفائدة", "الركن الأول ما نبدأ به، والثاني يخبر عنه", "اذكر البداية والركنين الأساسيين"] },
+                            { q: "بماذا تبدأ الجملة الفعلية؟ وما ركناها الأساسيان؟", hints: ["انظر إلى الكلمة الأولى في الجملة الفعلية", "تبدأ بفعل", "لكل فعل من يقوم به أو يتصف به", "الركن الأول الفعل، والثاني الفاعل", "اذكر البداية والركنين الأساسيين"] },
+                            { q: "حوّل الجملة الفعلية الآتية إلى جملة اسمية: «يكتبُ الطالبُ الدرسَ».", hints: ["ابحث عن الاسم في الجملة", "الاسم هو «الطالب»", "اجعل الاسم في أول الجملة", "أكمل باقي الجملة بترتيب صحيح", "اكتب الجملة الاسمية الناتجة"] },
+                            { q: "حوّل الجملة الاسمية الآتية إلى جملة فعلية: «المعلّمُ يشرحُ القاعدةَ».", hints: ["ابحث عن الفعل في الجملة", "الفعل هو «يشرح»", "ابدأ الجملة بالفعل", "اذكر الفاعل ثم بقية الجملة", "اكتب الجملة الفعلية الناتجة"] },
+                            { q: "صنّف الجملة الآتية: «الرياضةُ تقوّي الجسمَ» (اسمية أم فعلية)؟", hints: ["انظر إلى أول كلمة في الجملة", "هل كلمة «الرياضة» اسم أم فعل؟", "تبدأ باسم إذن هي جملة اسمية", "تأكد من نوعها", "اكتب التصنيف"] },
+                            { q: "صنّف الجملة الآتية: «قرأَ أحمدُ قصةً مفيدةً» (اسمية أم فعلية)؟", hints: ["انظر إلى أول كلمة في الجملة", "هل كلمة «قرأ» فعل أم اسم؟", "تبدأ بفعل إذن هي جملة فعلية", "تأكد من نوعها", "اكتب التصنيف"] },
+                            { q: "متى تُكتب التاء المربوطة (ة / ـة) في نهاية الكلمة غالباً؟", hints: ["جرّب نطق الكلمة عند الوقف وعند الوصل", "تُلفظ هاءً عند الوقف وتاءً عند الوصل", "تأتي كثيراً في الأسماء المؤنثة المفردة", "مثل: مدرسة، وردة", "اكتب القاعدة بوضوح"] },
+                            { q: "ما الفرق بين التاء المربوطة (ة) والهاء المربوطة (ه) في آخر الكلمة؟", hints: ["انطق الكلمة عند الوقف والوصل", "الهاء تبقى هاءً في الحالتين ولا تضع نقطتين", "التاء المربوطة تُلفظ تاءً عند الوصل ولها نقطتان", "قارن بينهما بمثالين", "وضّح الفرق بدقة"] },
+                            { q: "أكمل الفراغ بتاء مربوطة أو تاء مفتوحة: «ذهبَ خالدٌ إلى المدرسـ[...] مبكراً».", hints: ["انظر إلى الكلمة «المدرسة»", "هل هي اسم مؤنث مفرد؟", "كيف تُنطق عند الوقف؟ هاءً", "تُكتب بتاء مربوطة متصلة بما قبلها", "اكتب الكلمة مكتملة أو شكل التاء"] },
+                            { q: "عيّن الركنين الأساسيين في الجملة الفعلية: «تعاونَ الطلابُ في النظافةِ».", hints: ["حدّد الكلمة الدالة على الحدث", "الفعل هو «تعاون»", "اسأل: من الذي تعاون؟", "الفاعل هو «الطلاب»", "اذكر الفعل والفاعل بوضوح"] }
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    english: {
+        name: "كتاب اللغة الإنجليزية",
+        icon: "🔤",
+        units: {
+            eu1: {
+                name: "Unit 1: Daily Routines & School Life",
+                lessons: [
+                    {
+                        title: "Lesson 1: Present Simple & Daily Activities",
+                        youtubeUrl: "https://www.youtube.com/results?search_query=Present+Simple+Grade+4+English+Action+Pack",
+                        questions: [
+                            { q: "Complete the sentence: She _____ (play / plays) tennis every day.", hints: ["Look at the subject before the blank", "The subject is 'She' (singular)", "In Present Simple, singular third person adds '-s'", "Compare 'play' and 'plays'", "Choose the verb form with '-s'"] },
+                            { q: "Choose the correct question word: _____ do you wake up? (When / Where)", hints: ["Check what information the answer gives", "Waking up relates to time", "'When' asks about time", "'Where' asks about place", "Select the right question word"] },
+                            { q: "Complete the sentence: They _____ (go / goes) to school at 7:30.", hints: ["Identify the subject 'They'", "Is 'They' singular or plural?", "Plural subjects keep the base verb without '-s'", "Compare 'go' and 'goes'", "Choose the correct form"] },
+                            { q: "Choose the correct question word: _____ is your classroom? (Where / Who)", hints: ["Think about what 'classroom' means", "A classroom is a place", "'Where' asks about place/location", "'Who' asks about a person", "Choose the matching question word"] },
+                            { q: "Complete the sentence: He _____ (read / reads) a story every night.", hints: ["Look at the subject 'He'", "In Present Simple, 'He' takes '-s'", "Add '-s' to the base verb", "Notice the routine clue 'every night'", "Write the correct verb"] },
+                            { q: "Make it negative: I like apples. -> I _____ like apples.", hints: ["We need a negative form in Present Simple for 'I'", "Use 'do not' or 'don't'", "Keep the main verb unchanged", "Read the negative sentence", "Write the missing negative word"] },
+                            { q: "Choose the correct verb: We _____ (eat / eats) breakfast at 7 o'clock.", hints: ["Look at the subject 'We'", "'We' is plural", "Do not add '-s' to the verb", "Compare 'eat' and 'eats'", "Choose the correct verb"] },
+                            { q: "What does 'every day' tell us about the tense?", hints: ["Think about how often the action happens", "'Every day' shows a repeated habit or routine", "Which tense is used for daily routines?", "Present Simple", "Explain this in a clear short answer"] },
+                            { q: "Complete the question: _____ she speak English? (Does / Do)", hints: ["Look at the subject 'she'", "Singular 'she' uses 'Does' in questions", "'Do' is used with I, you, we, they", "Check the question starter", "Choose 'Does' or 'Do'"] },
+                            { q: "Put the words in order to make a correct sentence: (school / to / walk / I).", hints: ["Start with the subject 'I'", "Follow with the verb 'walk'", "Add 'to school'", "Check word order and punctuation", "Write the complete sentence"] }
+                        ]
+                    }
+                ]
+            },
+            eu2: {
+                name: "Unit 2: Places & Directions",
+                lessons: [
+                    {
+                        title: "Lesson 1: Vocabulary & Prepositions",
+                        youtubeUrl: "https://www.youtube.com/results?search_query=Prepositions+of+place+Grade+4+English+Action+Pack",
+                        questions: [
+                            { q: "What is the opposite of 'big'?", hints: ["Think about size", "'Big' means large", "What word means the opposite of large?", "It starts with 's'", "Write the opposite word"] },
+                            { q: "What is the Arabic meaning of the word 'library'?", hints: ["Think of a place full of books", "People read or borrow books there", "It is not a clinic or playground", "Translate 'library' into Arabic", "Write the Arabic meaning"] },
+                            { q: "Choose the correct preposition: The book is _____ the table. (on / in)", hints: ["Picture a book resting on the surface of a table", "'On' means فوق / على سطح", "'In' means داخل", "Which preposition fits?", "Choose 'on' or 'in'"] },
+                            { q: "Choose the correct preposition: The pencils are _____ the pencil case. (in / under)", hints: ["Where are pencils kept inside a case?", "Inside the case", "'In' means داخل", "'Under' means تحت", "Choose the right preposition"] },
+                            { q: "What is the opposite of 'tall'?", hints: ["Think about height", "'Tall' means high in height", "What is the opposite of tall?", "It starts with 's'", "Write the opposite word"] },
+                            { q: "What is the Arabic meaning of 'school'?", hints: ["Where do students study every day?", "A place of learning and teachers", "Translate 'school' to Arabic", "Check the meaning", "Write the Arabic word"] },
+                            { q: "Choose the correct preposition: The cat is _____ the chair. (under / between)", hints: ["The cat is below the chair", "'Under' means تحت", "'Between' is for two things", "Select the fitting preposition", "Choose 'under' or 'between'"] },
+                            { q: "What is the opposite of 'happy'?", hints: ["Think about feelings", "'Happy' means feeling joy", "What is the opposite feeling?", "It starts with 's'", "Write the opposite word"] },
+                            { q: "What is the Arabic meaning of 'hospital'?", hints: ["Where do patients see a doctor?", "A place for medical care", "Translate 'hospital' to Arabic", "Check spelling", "Write the Arabic meaning"] },
+                            { q: "Complete the sentence: Go _____ and turn left. (straight / book)", hints: ["Look at 'turn left' as a direction", "We need a direction word after 'Go'", "'Straight' means بشكل مستقيم / للأمام", "'Book' does not fit a direction", "Choose the correct word"] }
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+};
+
+// ===== بوابة الدخول والقائمة والتنقل =====
+function registerNewStudent() {
+    const school = document.getElementById("regSchool").value.trim();
+    const section = document.getElementById("regSection").value.trim();
+    const name = document.getElementById("regName").value.trim();
+    const err = document.getElementById("accessError");
+
+    if (!school || !section || !name) {
+        err.style.display = "block";
+        return;
+    }
+    err.style.display = "none";
+
+    currentStudent = {
+        id: "st_" + btoa(unescape(encodeURIComponent(name + "_" + school + "_" + section))).slice(0, 14),
+        name,
+        school,
+        grade: "الصف الرابع الأساسي",
+        section
+    };
+
+    localStorage.setItem(STORAGE_KEYS.session, JSON.stringify(currentStudent));
+    applyStudentSession();
+}
+
+function applyStudentSession() {
+    if (!currentStudent) return;
+    document.getElementById("studentAccessGate").classList.add("hidden");
+    document.body.classList.remove("locked");
+    document.getElementById("studentBadgeName").textContent = `👨🏻‍🎓 ${currentStudent.name}`;
+    document.getElementById("heroSelectedGradeTitle").textContent =
+        `🎓 ${currentStudent.school} | ${currentStudent.grade} - ${currentStudent.section}`;
+    document.getElementById("studentPersonalAiHeading").textContent =
+        `🤖 مساعد ذكي (${currentStudent.name})`;
+
+    loadAssignmentsFromTeacher();
+    loadTeacherChatMessages();
+}
+
+function logoutStudent() {
+    localStorage.removeItem(STORAGE_KEYS.session);
+    currentStudent = null;
+    closeMenu();
+    document.getElementById("studentAccessGate").classList.remove("hidden");
+    document.body.classList.add("locked");
+}
+
+function toggleMenu() {
+    document.getElementById("sideMenu").classList.toggle("open");
+    document.getElementById("menuOverlay").classList.toggle("show");
+}
+function closeMenu() {
+    document.getElementById("sideMenu").classList.remove("open");
+    document.getElementById("menuOverlay").classList.remove("show");
+}
+function switchView(viewId) {
+    document.querySelectorAll(".app-view").forEach(v => v.classList.remove("show"));
+    document.getElementById(viewId).classList.add("show");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+}
+function goHomeFromMenu() {
+    closeMenu();
+    switchView("subjectsView");
+}
+function goBackToSubjects() { switchView("subjectsView"); }
+function goBackToUnits() { switchView("unitsView"); }
+function goBackToLessons() { switchView("lessonsView"); }
+
+// ===== استعراض المواد والوحدات والدروس =====
+function openSubjectUnits(subjectKey) {
+    const subj = ministryCurriculumData[subjectKey];
+    if (!subj) return;
+    selectedSubjectKey = subjectKey;
+    selectedSubjectName = subj.name;
+    selectChatSubject(subjectKey, false);
+
+    document.getElementById("subjectHeaderTitle").textContent = `${subj.icon} ${subj.name} — الوحدات الدراسية`;
+    const container = document.getElementById("unitsContainer");
+    container.innerHTML = "";
+
+    Object.entries(subj.units).forEach(([uKey, uObj]) => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+            <div>
+                <div class="card-icon">📂</div>
+                <h3>${uObj.name}</h3>
+                <p>عدد الدروس: ${uObj.lessons.length} دروس</p>
+            </div>
+            <button class="btn btn-primary full-btn">عرض دروس الوحدة</button>
+        `;
+        card.onclick = () => openUnitLessons(uKey, uObj);
+        container.appendChild(card);
+    });
+
+    switchView("unitsView");
+}
+
+function openUnitLessons(unitKey, unitObj) {
+    selectedUnitKey = unitKey;
+    selectedUnitName = unitObj.name;
+    document.getElementById("unitTitleHeader").textContent = `${unitObj.name} — الدروس`;
+
+    const container = document.getElementById("lessonsContainer");
+    container.innerHTML = "";
+
+    unitObj.lessons.forEach((lesson, idx) => {
+        const ytUrl = getLessonYoutubeUrl(lesson, selectedSubjectName);
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+            <div>
+                <div class="card-icon">📘</div>
+                <h3>${lesson.title}</h3>
+                <p>يحتوي على ${QUESTIONS_PER_LESSON} أسئلة تدريبية + ${MAX_HINTS_PER_QUESTION} تلميحات لكل سؤال</p>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+                <button class="btn btn-yellow full-btn">بدء التدريبات</button>
+                <a href="${escapeHtml(ytUrl)}" target="_blank" rel="noopener noreferrer" class="btn btn-yt full-btn" style="justify-content:center;" onclick="event.stopPropagation()">▶ شرح الدرس على يوتيوب</a>
+            </div>
+        `;
+        card.onclick = () => startLessonTraining(lesson, idx);
+        container.appendChild(card);
+    });
+
+    switchView("lessonsView");
+}
+
+function startLessonTraining(lessonObj) {
+    currentLessonObj = lessonObj;
+    selectedLessonTitle = lessonObj.title;
+    currentQuestions = expandLessonToTenQuestions(lessonObj);
+    currentQuestionIndex = 0;
+    resetQuestionHintState();
+
+    document.getElementById("currentLessonPathTitle").textContent =
+        `📚 ${selectedSubjectName} ⬅ ${selectedUnitName} ⬅ ${selectedLessonTitle}`;
+
+    const ytLinkEl = document.getElementById("lessonYoutubeLink");
+    if (ytLinkEl) {
+        ytLinkEl.href = getLessonYoutubeUrl(lessonObj, selectedSubjectName);
+    }
+
+    if (selectedSubjectKey) {
+        selectChatSubject(selectedSubjectKey, true);
+    }
+
+    renderCurrentQuestion();
+    switchView("trainingAiView");
+}
+
+function resetQuestionHintState() {
+    hintLevel = 0;
+    shownHintsList = [];
+    const hintBox = document.getElementById("hintBox");
+    hintBox.style.display = "none";
+    hintBox.innerHTML = "";
+    updateHintButtonLabel();
+}
+
+function updateHintButtonLabel() {
+    const btn = document.getElementById("hintBtn");
+    if (!btn) return;
+    if (hintLevel >= MAX_HINTS_PER_QUESTION) {
+        btn.textContent = `💡 اكتملت التلميحات (${MAX_HINTS_PER_QUESTION} / ${MAX_HINTS_PER_QUESTION})`;
+    } else {
+        btn.textContent = `💡 تلميح (${hintLevel} / ${MAX_HINTS_PER_QUESTION})`;
+    }
+}
+
+function renderCurrentQuestion() {
+    const total = currentQuestions.length;
+    const qObj = currentQuestions[currentQuestionIndex];
+    document.getElementById("questionNumber").textContent = `السؤال رقم (${currentQuestionIndex + 1})`;
+    document.getElementById("questionText").textContent = qObj.q;
+    document.getElementById("studentAnswer").value = "";
+
+    const pct = Math.round(((currentQuestionIndex + 1) / total) * 100);
+    document.getElementById("progressFill").style.width = `${pct}%`;
+    document.getElementById("progressText").textContent = `السؤال ${currentQuestionIndex + 1} من ${total}`;
+    updateHintButtonLabel();
+}
+
+function nextQuestion() {
+    if (currentQuestionIndex < currentQuestions.length - 1) {
+        currentQuestionIndex++;
+        resetQuestionHintState();
+        renderCurrentQuestion();
+    } else {
+        alert("🎉 أحسنت يا بطل! لقد أنهيت جميع أسئلة هذا الدرس.");
+    }
+}
+
+// ===== نظام التلميحات الخمس وتسجيل مشكلة الطالب للمعلم قبل فتح التلميح =====
+function getQuestionKey() {
+    return `${selectedSubjectKey}__${selectedUnitKey}__${selectedLessonTitle}__q${currentQuestionIndex}`;
+}
+
+function handleHintClick() {
+    if (!currentQuestions[currentQuestionIndex]) return;
+
+    if (hintLevel >= MAX_HINTS_PER_QUESTION) {
+        renderHintsBox();
+        return;
+    }
+
+    const qKey = getQuestionKey();
+    if (!questionIssueRecorded[qKey]) {
+        selectedQuickIssueText = "";
+        document.getElementById("studentIssueInput").value = "";
+        document.getElementById("issueModalError").style.display = "none";
+        document.querySelectorAll(".issue-chip").forEach(c => c.classList.remove("active"));
+        document.getElementById("issueModal").classList.add("show");
+        return;
+    }
+
+    revealNextHint();
+}
+
+function selectQuickIssue(el, text) {
+    document.querySelectorAll(".issue-chip").forEach(c => c.classList.remove("active"));
+    el.classList.add("active");
+    selectedQuickIssueText = text;
+    document.getElementById("issueModalError").style.display = "none";
+}
+
+function closeIssueModal() {
+    document.getElementById("issueModal").classList.remove("show");
+}
+
+async function submitIssueAndOpenHints() {
+    const customText = document.getElementById("studentIssueInput").value.trim();
+    const issueDescription = customText || selectedQuickIssueText;
+
+    if (!issueDescription) {
+        document.getElementById("issueModalError").style.display = "block";
+        return;
+    }
+
+    const qKey = getQuestionKey();
+    questionIssueRecorded[qKey] = issueDescription;
+    closeIssueModal();
+
+    await revealNextHint(issueDescription);
+}
+
+async function revealNextHint(recordedIssue = "") {
+    const qObj = currentQuestions[currentQuestionIndex];
+    if (!qObj || hintLevel >= MAX_HINTS_PER_QUESTION) return;
+
+    const hintText = qObj.hints[hintLevel] || "حاول قراءة السؤال مرة أخرى وتقسيمه إلى أجزاء بسيطة.";
+    hintLevel += 1;
+    shownHintsList.push({ level: hintLevel, text: hintText });
+
+    const issueText = recordedIssue || questionIssueRecorded[getQuestionKey()] || "لم يحدد";
+    await persistHintLogToTeacher(issueText, hintLevel, hintText);
+    renderHintsBox(issueText);
+    updateHintButtonLabel();
+}
+
+function renderHintsBox(issueText = "") {
+    const hintBox = document.getElementById("hintBox");
+    hintBox.style.display = "block";
+
+    const issueBanner = issueText
+        ? `<div style="font-size:13px; color:#7a5600; margin-bottom:10px; font-weight:bold;">📌 المشكلة المسجلة للمعلم للتقييم: ${escapeHtml(issueText)}</div>`
+        : "";
+
+    const itemsHtml = shownHintsList.map(h => `
+        <div class="hint-step-item">
+            <strong>تلميح ${h.level} من ${MAX_HINTS_PER_QUESTION}:</strong> ${escapeHtml(h.text)}
+        </div>
+    `).join("");
+
+    const remainingMsg = hintLevel < MAX_HINTS_PER_QUESTION
+        ? `<div style="font-size:13px; color:#555; margin-top:6px;">يمكنك الضغط على زر التلميح مرة أخرى للحصول على التلميح رقم (${hintLevel + 1}).</div>`
+        : `<div style="font-size:13px; color:#2e7d32; font-weight:bold; margin-top:6px;">✅ تم استعراض جميع التلميحات الخمس لهذا السؤال.</div>`;
+
+    hintBox.innerHTML = issueBanner + itemsHtml + remainingMsg;
+}
+
+async function persistHintLogToTeacher(studentIssue, hintsUsedCount, latestHintText = "") {
+    const meta = getStudentMeta();
+    const qObj = currentQuestions[currentQuestionIndex] || {};
+    const logRecord = {
+        id: "hl_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6),
+        ...meta,
+        subject_key: selectedSubjectKey || "math",
+        subject: selectedSubjectName || "كتاب الرياضيات",
+        unit: selectedUnitName || "",
+        lesson: selectedLessonTitle || "",
+        question_number: currentQuestionIndex + 1,
+        question_text: qObj.q || "",
+        student_issue: studentIssue,
+        hints_used: hintsUsedCount,
+        max_hints: MAX_HINTS_PER_QUESTION,
+        latest_hint: latestHintText,
+        status_for_teacher: "بانتظار التقييم",
+        created_at: new Date().toISOString()
+    };
+
+    const existing = JSON.parse(localStorage.getItem(STORAGE_KEYS.hintLogs) || "[]");
+    existing.unshift(logRecord);
+    localStorage.setItem(STORAGE_KEYS.hintLogs, JSON.stringify(existing.slice(0, 400)));
+
+    await syncToSupabase("student_hint_logs", logRecord);
+}
+
+// ===== إرسال الحل وتخزينه لصفحة المعلم للتقييم =====
+async function saveAttempt() {
+    const ans = document.getElementById("studentAnswer").value.trim();
+    if (!ans) {
+        alert("يرجى كتابة محاولتك أو إجابتك أولاً.");
+        return;
+    }
+
+    const meta = getStudentMeta();
+    const qObj = currentQuestions[currentQuestionIndex] || {};
+    const attemptRecord = {
+        id: "att_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6),
+        ...meta,
+        subject_key: selectedSubjectKey || "math",
+        subject: selectedSubjectName || "كتاب الرياضيات",
+        unit: selectedUnitName || "",
+        lesson: selectedLessonTitle || "",
+        question_number: currentQuestionIndex + 1,
+        question_text: qObj.q || "",
+        student_answer: ans,
+        hints_used: hintLevel,
+        recorded_issue: questionIssueRecorded[getQuestionKey()] || null,
+        evaluation_status: "بانتظار التقييم",
+        created_at: new Date().toISOString()
+    };
+
+    const existing = JSON.parse(localStorage.getItem(STORAGE_KEYS.attempts) || "[]");
+    existing.unshift(attemptRecord);
+    localStorage.setItem(STORAGE_KEYS.attempts, JSON.stringify(existing.slice(0, 500)));
+
+    await syncToSupabase("student_attempts", attemptRecord);
+
+    alert("✅ تم حفظ إجابتك وإرسالها إلى صفحة المعلم للتقييم! يمكنك الانتقال للسؤال التالي أو طلب تلميح.");
+}
+
+// ===== مساعد الذكاء الاصطناعي (AI) مع إرفاق صورة وتوجيه خطوة بخطوة وتسجيل النشاط =====
+function triggerAiImagePicker() {
+    document.getElementById("aiImageInput").click();
+}
+
+function handleAiImageSelected(event) {
+    const file = event.target.files && event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        attachedAiImageDataUrl = e.target.result;
+        attachedAiImageName = file.name;
+        document.getElementById("aiImageThumb").src = attachedAiImageDataUrl;
+        document.getElementById("aiImageName").textContent = file.name;
+        document.getElementById("aiImagePreviewBar").style.display = "flex";
+    };
+    reader.readAsDataURL(file);
+}
+
+function clearAiAttachedImage() {
+    attachedAiImageDataUrl = "";
+    attachedAiImageName = "";
+    const inputEl = document.getElementById("aiImageInput");
+    if (inputEl) inputEl.value = "";
+    document.getElementById("aiImagePreviewBar").style.display = "none";
+    document.getElementById("aiImageThumb").src = "";
+}
+
+async function generateGuidedAiReply({ promptText, hadImage, imageDataUrl, qObj }) {
+    const systemGuidance =
+        "أنت مساعد تعليمي ذكي لطلاب الصف الرابع الأساسي في منصة Mind AI. لا تعطِ الحل النهائي الجاهز مباشرة؛ بل وجّه الطالب خطوة بخطوة بطرح سؤال موجه أو تذكير بالقاعدة المناسبة بلغة عربية واضحة ومشجعة.";
+
+    if (typeof window.MIND_AI_ENDPOINT === "string" && window.MIND_AI_ENDPOINT.trim()) {
+        try {
+            const resp = await fetch(window.MIND_AI_ENDPOINT.trim(), {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    system: systemGuidance,
+                    prompt: promptText,
+                    hasImage: hadImage,
+                    imageDataUrl: hadImage ? imageDataUrl : null,
+                    context: {
+                        subject: selectedSubjectName || getSubjectArabicName(activeChatSubjectKey),
+                        unit: selectedUnitName,
+                        lesson: selectedLessonTitle,
+                        question: qObj ? qObj.q : ""
+                    }
+                })
+            });
+            if (resp.ok) {
+                const data = await resp.json();
+                if (data && typeof data.reply === "string" && data.reply.trim()) {
+                    return data.reply.trim();
+                }
+            }
+        } catch (err) {
+            console.warn("تعذر الاتصال بنقطة نهاية الذكاء الاصطناعي، سيتم استخدام التوجيه المحلي:", err.message || err);
+        }
+    }
+
+    if (window.supabaseClient && typeof window.supabaseClient.functions?.invoke === "function") {
+        try {
+            const { data, error } = await window.supabaseClient.functions.invoke("mind-ai-tutor", {
+                body: {
+                    system: systemGuidance,
+                    prompt: promptText,
+                    hasImage: hadImage,
+                    imageDataUrl: hadImage ? imageDataUrl : null,
+                    context: {
+                        subject: selectedSubjectName || getSubjectArabicName(activeChatSubjectKey),
+                        unit: selectedUnitName,
+                        lesson: selectedLessonTitle,
+                        question: qObj ? qObj.q : ""
+                    }
+                }
+            });
+            if (!error && data && typeof data.reply === "string" && data.reply.trim()) {
+                return data.reply.trim();
+            }
+        } catch (_) {}
+    }
+
+    const firstStepHint = qObj && Array.isArray(qObj.hints) && qObj.hints[0]
+        ? qObj.hints[0]
+        : "اقرأ المطلوب بهدوء وحدّد المعطيات الأساسية قبل البدء";
+
+    if (hadImage) {
+        return `وصلت الصورة يا بطل! لنحلّها خطوة بخطوة دون استعجال:\n1) انظر إلى المعطيات أو الكلمات المفتاحية في الصورة.\n2) ${firstStepHint}.\n3) جرّب كتابة خطوتك الأولى هنا، وسأساعدك على التحقق من مسارك.`;
+    }
+
+    return `أهلاً بك يا بطل! بخصوص (${promptText}):\n• الخطوة الأولى: ${firstStepHint}.\n• ما أول خطوة قمت بتجربتها أو ما الجزء الذي بدا غير واضح لك؟ اكتب محاولتك لنكمل معاً.`;
+}
+
+async function sendMessage() {
+    const input = document.getElementById("chatInput");
+    const sendBtn = document.getElementById("sendChatBtn");
+    const text = input.value.trim();
+    const hadImage = Boolean(attachedAiImageDataUrl);
+    const imageName = attachedAiImageName;
+    const imageUrlSnapshot = attachedAiImageDataUrl;
+
+    if (!text && !hadImage) return;
+
+    const chatBox = document.getElementById("chatMessages");
+    const sMsg = document.createElement("div");
+    sMsg.className = "message student";
+
+    if (hadImage && imageUrlSnapshot) {
+        const imgEl = document.createElement("img");
+        imgEl.src = imageUrlSnapshot;
+        imgEl.alt = imageName || "صورة مرفقة";
+        sMsg.appendChild(imgEl);
+    }
+
+    if (text) {
+        const txtEl = document.createElement("div");
+        txtEl.textContent = text;
+        sMsg.appendChild(txtEl);
+    } else if (hadImage) {
+        const capEl = document.createElement("div");
+        capEl.textContent = "أرفقت لك هذه الصورة للمساعدة في حلها.";
+        sMsg.appendChild(capEl);
+    }
+
+    chatBox.appendChild(sMsg);
+
+    const thinkingMsg = document.createElement("div");
+    thinkingMsg.className = "message ai";
+    thinkingMsg.textContent = "⏳ جاري تحليل سؤالك وتجهيز التوجيه...";
+    chatBox.appendChild(thinkingMsg);
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    input.value = "";
+    clearAiAttachedImage();
+    if (sendBtn) sendBtn.disabled = true;
+
+    const qObj = currentQuestions[currentQuestionIndex];
+    const replyText = await generateGuidedAiReply({
+        promptText: text || "إرفاق صورة للمساعدة",
+        hadImage,
+        imageDataUrl: imageUrlSnapshot,
+        qObj
+    });
+
+    thinkingMsg.textContent = replyText;
+    if (sendBtn) sendBtn.disabled = false;
+
+    const meta = getStudentMeta();
+    const aiLog = {
+        id: "ailog_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6),
+        ...meta,
+        subject_key: selectedSubjectKey || activeChatSubjectKey,
+        subject: selectedSubjectName || getSubjectArabicName(activeChatSubjectKey),
+        unit: selectedUnitName || "",
+        lesson: selectedLessonTitle || "",
+        question_number: currentQuestions.length ? currentQuestionIndex + 1 : null,
+        prompt_text: text || "إرفاق صورة للمساعدة",
+        has_image: hadImage,
+        image_name: imageName || null,
+        ai_reply: replyText,
+        created_at: new Date().toISOString()
+    };
+
+    const existingLogs = JSON.parse(localStorage.getItem(STORAGE_KEYS.aiLogs) || "[]");
+    existingLogs.unshift(aiLog);
+    localStorage.setItem(STORAGE_KEYS.aiLogs, JSON.stringify(existingLogs.slice(0, 400)));
+    await syncToSupabase("student_ai_logs", aiLog);
+
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+// ===== تواصل مع المعلم (محادثة منفصلة لكل مادة وتظهر فقط داخل صفحة التدريبات) =====
+function selectChatSubject(subjKey, shouldReload = true) {
+    activeChatSubjectKey = subjKey || "math";
+    document.querySelectorAll("#subjectChatTabs .subject-tab-btn").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.subj === activeChatSubjectKey);
+    });
+    if (shouldReload) {
+        loadTeacherChatMessages();
+    }
+}
+
+function attachCurrentQuestionToChat() {
+    const qObj = currentQuestions[currentQuestionIndex];
+    const subjLabel = selectedSubjectName || getSubjectArabicName(activeChatSubjectKey);
+    const qText = qObj ? qObj.q : `سؤال من درس: ${selectedLessonTitle || "عام"}`;
+    attachedQuestionTextForChat = `[${subjLabel} - سؤال ${currentQuestionIndex + 1}]: ${qText}`;
+
+    if (selectedSubjectKey) {
+        selectChatSubject(selectedSubjectKey, false);
+    }
+
+    const preview = document.getElementById("attachedQuestionPreview");
+    preview.style.display = "block";
+    preview.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+            <span>📎 <strong>السؤال المرفق:</strong> ${escapeHtml(attachedQuestionTextForChat)}</span>
+            <button type="button" onclick="clearAttachedQuestion()" style="border:none; background:none; color:#b71c1c; font-weight:bold; cursor:pointer;">✕</button>
+        </div>
+    `;
+}
+
+function clearAttachedQuestion() {
+    attachedQuestionTextForChat = "";
+    const preview = document.getElementById("attachedQuestionPreview");
+    preview.style.display = "none";
+    preview.innerHTML = "";
+}
+
+async function sendTeacherChatMessage() {
+    const input = document.getElementById("waChatInput");
+    const text = input.value.trim();
+    if (!text && !attachedQuestionTextForChat) return;
+
+    const meta = getStudentMeta();
+    const subjName = getSubjectArabicName(activeChatSubjectKey);
+
+    const msgObj = {
+        id: "msg_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6),
+        ...meta,
+        subject_key: activeChatSubjectKey,
+        subject: subjName,
+        sender_role: "student",
+        sender_name: meta.student_name,
+        attached_question: attachedQuestionTextForChat || null,
+        message_text: text || "أرفقت لك هذا السؤال للمساعدة.",
+        is_read: false,
+        created_at: new Date().toISOString()
+    };
+
+    const existing = JSON.parse(localStorage.getItem(STORAGE_KEYS.messages) || "[]");
+    existing.push(msgObj);
+    localStorage.setItem(STORAGE_KEYS.messages, JSON.stringify(existing.slice(-600)));
+
+    await syncToSupabase("teacher_student_messages", msgObj);
+
+    input.value = "";
+    clearAttachedQuestion();
+    loadTeacherChatMessages();
+}
+
+async function loadTeacherChatMessages() {
+    const box = document.getElementById("waChatMessages");
+    if (!box) return;
+
+    let allMsgs = JSON.parse(localStorage.getItem(STORAGE_KEYS.messages) || "[]");
+
+    if (window.supabaseClient) {
+        try {
+            const { data, error } = await window.supabaseClient
+                .from("teacher_student_messages")
+                .select("*")
+                .order("created_at", { ascending: true });
+            if (!error && Array.isArray(data) && data.length) {
+                const mapById = new Map();
+                allMsgs.forEach(m => mapById.set(m.id, m));
+                data.forEach(m => mapById.set(m.id, m));
+                allMsgs = Array.from(mapById.values()).sort(
+                    (a, b) => new Date(a.created_at) - new Date(b.created_at)
+                );
+                localStorage.setItem(STORAGE_KEYS.messages, JSON.stringify(allMsgs.slice(-600)));
+            }
+        } catch (e) {
+            console.warn("تعذر جلب رسائل المحادثة من Supabase:", e.message || e);
+        }
+    }
+
+    const meta = getStudentMeta();
+    const filtered = allMsgs.filter(m => {
+        const sameSubj = (m.subject_key || "") === activeChatSubjectKey;
+        const sameStudent = !currentStudent || !m.student_name || m.student_name === meta.student_name;
+        return sameSubj && sameStudent;
+    });
+
+    if (!filtered.length) {
+        box.innerHTML = `<div style="text-align:center; color:#667781; padding:30px 10px; font-size:14px;">لا توجد رسائل بعد في مادة ${escapeHtml(getSubjectArabicName(activeChatSubjectKey))}. ابدأ بكتابة سؤالك لمعلم المادة.</div>`;
+        return;
+    }
+
+    box.innerHTML = filtered.map(m => {
+        const isMe = m.sender_role === "student";
+        const attachedHtml = m.attached_question
+            ? `<div class="wa-attached-q">📎 ${escapeHtml(m.attached_question)}</div>`
+            : "";
+        return `
+            <div class="wa-msg ${isMe ? "me" : "teacher"}">
+                ${attachedHtml}
+                <div>${escapeHtml(m.message_text)}</div>
+                <div class="wa-meta">
+                    <span>${escapeHtml(m.sender_name || (isMe ? meta.student_name : "المعلم"))}</span>
+                    <span>${escapeHtml(formatTimeArabic(m.created_at))}</span>
+                </div>
+            </div>
+        `;
+    }).join("");
+
+    box.scrollTop = box.scrollHeight;
+}
+
+// ===== استقبال الواجبات والكويزات المرسلة من صفحة المعلم وتسليم حلولها للتقييم =====
+async function loadAssignmentsFromTeacher() {
+    const container = document.getElementById("studentReceivedAssignmentsList");
+    if (!container) return;
+
+    let assignments = JSON.parse(localStorage.getItem(STORAGE_KEYS.assignments) || "[]");
+
+    if (window.supabaseClient) {
+        try {
+            const { data, error } = await window.supabaseClient
+                .from("teacher_assignments")
+                .select("*")
+                .order("created_at", { ascending: false });
+            if (!error && Array.isArray(data) && data.length) {
+                const mapById = new Map();
+                assignments.forEach(a => mapById.set(a.id, a));
+                data.forEach(a => mapById.set(a.id, a));
+                assignments = Array.from(mapById.values()).sort(
+                    (a, b) => new Date(b.created_at) - new Date(a.created_at)
+                );
+                localStorage.setItem(STORAGE_KEYS.assignments, JSON.stringify(assignments.slice(0, 250)));
+            }
+        } catch (e) {
+            console.warn("تعذر جلب الواجبات من Supabase:", e.message || e);
+        }
+    }
+
+    const meta = getStudentMeta();
+    const relevant = assignments.filter(a => {
+        const schoolMatch = !a.school || a.school === "الكل" || a.school === meta.school;
+        const sectionMatch = !a.section || a.section === "الكل" || a.section === meta.section;
+        const studentMatch = !a.target_student || a.target_student === "الكل" || a.target_student === meta.student_name;
+        return schoolMatch && sectionMatch && studentMatch;
+    });
+
+    if (!relevant.length) {
+        container.innerHTML = `<p style="color:#666; font-size:14px;">لا توجد واجبات أو كويزات مرسلة حتى الآن.</p>`;
+        return;
+    }
+
+    const submissions = JSON.parse(localStorage.getItem(STORAGE_KEYS.submissions) || "[]");
+
+    container.innerHTML = relevant.map(assign => {
+        const prevSub = submissions.find(
+            s => s.assignment_id === assign.id && s.student_name === meta.student_name
+        );
+        const inputId = `assign_ans_${assign.id}`;
+        const statusBadge = prevSub
+            ? `<span style="color:#2e7d32; font-weight:bold; font-size:12px;">✅ تم التسليم للتقييم</span>`
+            : `<span style="color:#b71c1c; font-weight:bold; font-size:12px;">⏳ بانتظار الحل</span>`;
+
+        return `
+            <div class="assignment-card">
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+                    <h4>${escapeHtml(assign.title || "واجب دراسي")}</h4>
+                    ${statusBadge}
+                </div>
+                <div class="assignment-meta">
+                    المادة: ${escapeHtml(assign.subject || "عام")} • المعلم: ${escapeHtml(assign.teacher_name || "معلم المادة")}
+                </div>
+                <p style="margin-bottom:10px; line-height:1.7; color:#333;">${escapeHtml(assign.description || assign.question || "")}</p>
+                <textarea id="${escapeHtml(inputId)}" class="input" rows="2" placeholder="اكتب إجابتك للواجب هنا...">${escapeHtml(prevSub ? prevSub.answer : "")}</textarea>
+                <div style="margin-top:10px;">
+                    <button type="button" class="btn btn-green" style="padding:8px 16px; font-size:13px;" onclick="submitAssignmentAnswer('${escapeHtml(assign.id)}', '${escapeHtml(assign.title || "واجب دراسي")}', '${escapeHtml(inputId)}')">تسليم إجابة الواجب</button>
+                </div>
+            </div>
+        `;
+    }).join("");
+}
+
+async function submitAssignmentAnswer(assignmentId, assignmentTitle, inputId) {
+    const textarea = document.getElementById(inputId);
+    const answerText = textarea ? textarea.value.trim() : "";
+    if (!answerText) {
+        alert("يرجى كتابة إجابة الواجب قبل التسليم.");
+        return;
+    }
+
+    const meta = getStudentMeta();
+    const record = {
+        id: "sub_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6),
+        assignment_id: assignmentId,
+        assignment_title: assignmentTitle,
+        ...meta,
+        answer: answerText,
+        evaluation_status: "بانتظار التقييم",
+        submitted_at: new Date().toISOString()
+    };
+
+    const existing = JSON.parse(localStorage.getItem(STORAGE_KEYS.submissions) || "[]");
+    const filtered = existing.filter(
+        s => !(s.assignment_id === assignmentId && s.student_name === meta.student_name)
+    );
+    filtered.unshift(record);
+    localStorage.setItem(STORAGE_KEYS.submissions, JSON.stringify(filtered.slice(0, 400)));
+
+    await syncToSupabase("student_assignment_submissions", record);
+
+    alert("✅ تم تسليم إجابة الواجب وإرسالها لصفحة المعلم للتقييم.");
+    loadAssignmentsFromTeacher();
+}
+
+// ===== تهيئة الجلسة عند فتح الصفحة =====
+window.addEventListener("DOMContentLoaded", () => {
+    try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEYS.session) || "null");
+        if (saved && saved.name && saved.school && saved.section) {
+            currentStudent = saved;
+            applyStudentSession();
+        } else {
+            loadAssignmentsFromTeacher();
+            loadTeacherChatMessages();
+        }
+    } catch (_) {
+        loadAssignmentsFromTeacher();
+        loadTeacherChatMessages();
+    }
+});
+</script>
+</body>
+</html>

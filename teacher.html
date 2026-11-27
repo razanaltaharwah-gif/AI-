@@ -1,0 +1,1740 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mind AI | بوابة المعلم — الصف الرابع الأساسي</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+
+<style>
+:root{
+  --red:#b71c1c;
+  --red-dark:#961515;
+  --yellow:#f0c419;
+  --yellow-soft:#ffe082;
+  --yellow-light:#fff8df;
+  --bg:linear-gradient(135deg, #fff8df, #ffe082, #fff4c2);
+  --white:#ffffff;
+  --text:#292929;
+  --muted:#666666;
+  --border:#f0dfb0;
+  --chat-green:#2e7d32;
+  --chat-green-dark:#1b5e20;
+  --shadow:0 8px 25px rgba(0,0,0,.07);
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:'Cairo', Arial, sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+}
+
+body.locked{overflow:hidden}
+button,input,select,textarea{font-family:inherit}
+button{cursor:pointer}
+.hidden{display:none!important}
+
+/* بوابة تسجيل دخول المعلم */
+.teacher-login-gate{
+  position:fixed;
+  inset:0;
+  z-index:200;
+  background:linear-gradient(135deg, #fff8df, #ffe082, #fff4c2);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:22px;
+  overflow-y:auto;
+}
+
+.login-card{
+  width:100%;
+  max-width:470px;
+  background:var(--white);
+  border-radius:28px;
+  padding:30px 26px;
+  box-shadow:0 16px 45px rgba(0,0,0,.16);
+  border-top:7px solid var(--red);
+  text-align:center;
+}
+
+.login-card h1{margin:6px 0 8px;color:var(--red);font-size:23px}
+.login-card p{margin:0 0 18px;color:var(--muted);font-size:14px;line-height:1.7}
+
+.login-field{text-align:right;margin-bottom:13px}
+.login-field label{display:block;font-weight:800;margin-bottom:6px;font-size:13.5px}
+.login-field input,.login-field select{
+  width:100%;
+  padding:11px 14px;
+  border:2px solid #e3d8ba;
+  border-radius:12px;
+  font-size:14px;
+  outline:none;
+  background:var(--white);
+}
+.login-field input:focus,.login-field select:focus{border-color:var(--red)}
+
+.login-error{
+  display:none;
+  margin-top:10px;
+  padding:10px 12px;
+  border-radius:12px;
+  background:#ffebee;
+  color:var(--red);
+  font-weight:800;
+  font-size:13px;
+}
+
+.app{display:flex;min-height:100vh}
+
+.sidebar{
+  width:250px;
+  background:var(--white);
+  border-left:2px solid var(--yellow-soft);
+  padding:20px 14px;
+  position:fixed;
+  top:0;bottom:0;right:0;
+  overflow-y:auto;
+  z-index:20;
+  box-shadow:-6px 0 25px rgba(0,0,0,.05);
+}
+
+.side-brand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:4px 8px 18px;
+  border-bottom:2px solid var(--yellow-light);
+  margin-bottom:12px;
+}
+
+.side-logo{
+  width:46px;height:46px;
+  border-radius:15px;
+  display:grid;place-items:center;
+  color:var(--white);background:var(--red);
+  font-size:21px;font-weight:900;
+}
+
+.side-brand strong{color:var(--red);font-size:18px}
+.side-brand small{display:block;color:var(--muted);font-size:11px;font-weight:700}
+
+.nav-btn{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  width:100%;
+  padding:11px 13px;
+  border:0;
+  background:transparent;
+  border-radius:14px;
+  text-align:right;
+  font-size:13.5px;
+  font-weight:700;
+  color:#444;
+  margin:4px 0;
+  transition:.2s;
+}
+
+.nav-btn:hover,.nav-btn.active{
+  background:var(--yellow-light);
+  color:var(--red);
+  border-right:4px solid var(--red);
+}
+
+.nav-btn.logout-btn{
+  background:#ffebee;
+  color:var(--red);
+  margin-top:14px;
+}
+
+.main{
+  margin-right:250px;
+  width:calc(100% - 250px);
+  padding:22px 28px 50px;
+}
+
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:14px;
+  margin-bottom:18px;
+  flex-wrap:wrap;
+  background:var(--white);
+  padding:16px 22px;
+  border-radius:20px;
+  box-shadow:var(--shadow);
+}
+
+.topbar h2{margin:0;font-size:21px;color:var(--red)}
+.topbar p{margin:3px 0 0;color:var(--muted);font-size:13px}
+
+.teacher-chip{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  background:var(--yellow-light);
+  border:2px solid var(--yellow);
+  padding:8px 14px;
+  border-radius:16px;
+}
+
+.avatar{
+  width:38px;height:38px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  background:var(--red);
+  color:var(--white);
+  font-weight:900;
+}
+
+.context-banner{
+  background:linear-gradient(135deg, #fff8df, #ffffff);
+  border:3px solid var(--yellow);
+  border-radius:20px;
+  padding:14px 20px;
+  text-align:center;
+  margin-bottom:20px;
+  box-shadow:var(--shadow);
+}
+
+.context-banner h3{margin:0;color:var(--red);font-size:17px;font-weight:800}
+
+.panel{display:none}
+.panel.active{display:block}
+
+/* المربعات الأربعة الرئيسية */
+.four-squares-grid{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:20px;
+  margin-bottom:24px;
+}
+
+.square-box{
+  background:var(--white);
+  border-radius:22px;
+  padding:24px;
+  box-shadow:var(--shadow);
+  border-top:6px solid var(--red);
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  min-height:205px;
+  transition:.2s;
+}
+
+.square-box:hover{transform:translateY(-3px)}
+.square-box.sq-students{border-top-color:var(--red)}
+.square-box.sq-sections{border-top-color:var(--yellow)}
+.square-box.sq-assignments{border-top-color:var(--red)}
+.square-box.sq-ai{border-top-color:var(--yellow)}
+
+.square-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+}
+
+.square-icon{font-size:36px;line-height:1}
+.square-count{
+  background:var(--yellow-light);
+  border:1.5px solid var(--yellow);
+  color:#7a5600;
+  padding:5px 12px;
+  border-radius:20px;
+  font-size:12.5px;
+  font-weight:800;
+}
+
+.square-box h3{margin:12px 0 6px;font-size:19px;color:var(--red)}
+.square-box p{margin:0 0 16px;color:var(--muted);font-size:13.5px;line-height:1.65}
+
+.card{
+  background:var(--white);
+  border-radius:22px;
+  padding:22px;
+  box-shadow:var(--shadow);
+  margin-bottom:20px;
+  border-top:5px solid var(--red);
+}
+
+.card.yellow-top{border-top-color:var(--yellow)}
+.card h3{margin:0 0 12px;font-size:18px;color:var(--red)}
+
+/* شات المعلم والطالب: اللون الأخضر مخصص له فقط */
+.card.student-chat-card{
+  border-top:5px solid var(--chat-green);
+}
+.card.student-chat-card h3{
+  color:var(--chat-green);
+}
+.chat-send-btn{
+  background:var(--chat-green);
+  color:var(--white);
+  padding:10px 20px;
+  border:0;
+  border-radius:14px;
+  font-weight:800;
+  transition:.2s;
+}
+.chat-send-btn:hover{background:var(--chat-green-dark)}
+
+.primary-btn,.yellow-btn,.secondary-btn,.danger-btn,.action-btn{
+  border:0;
+  border-radius:14px;
+  font-weight:800;
+  transition:.2s;
+}
+
+.primary-btn{background:var(--red);color:var(--white);padding:10px 18px}
+.primary-btn:hover{background:var(--red-dark)}
+
+.yellow-btn{background:var(--yellow);color:#333;padding:10px 18px}
+.yellow-btn:hover{background:#dcb00f}
+
+.secondary-btn{background:var(--white);color:#333;border:1.5px solid var(--border);padding:9px 15px;border-radius:12px}
+.danger-btn{background:#ffebee;color:var(--red);padding:7px 12px;border-radius:10px}
+.action-btn{background:var(--yellow-soft);color:var(--red);padding:6px 12px;border-radius:10px;font-size:12px}
+
+.field{margin:13px 0}
+.field label{display:block;font-weight:700;margin-bottom:6px;font-size:14px}
+.field input,.field select,.field textarea{
+  width:100%;
+  padding:11px 14px;
+  border:2px solid #e6dec8;
+  border-radius:12px;
+  outline:none;
+  background:var(--white);
+  font-size:14px;
+}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--red)}
+
+.subject-chat-tabs{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:12px;
+}
+
+.subject-tab-btn{
+  border:2px solid #e0e0e0;
+  background:#fafafa;
+  color:#444;
+  padding:8px 14px;
+  border-radius:14px;
+  font-size:13px;
+  font-weight:800;
+}
+
+.subject-tab-btn.active{
+  background:var(--chat-green);
+  color:var(--white);
+  border-color:var(--chat-green);
+}
+
+.wa-chat-box{
+  background:#efeae2;
+  border-radius:18px;
+  padding:16px;
+  height:320px;
+  overflow-y:auto;
+  margin:14px 0;
+  border:1px solid #ddd;
+}
+
+.wa-msg{
+  max-width:82%;
+  padding:10px 14px;
+  border-radius:14px;
+  margin-bottom:10px;
+  line-height:1.7;
+  font-size:14px;
+}
+
+.wa-msg.teacher{
+  background:#d9fdd3;
+  margin-right:auto;
+  border-top-right-radius:4px;
+  box-shadow:0 1px 2px rgba(0,0,0,.08);
+}
+
+.wa-msg.student{
+  background:#ffffff;
+  margin-left:auto;
+  border-top-left-radius:4px;
+  box-shadow:0 1px 2px rgba(0,0,0,.08);
+}
+
+.wa-meta{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  font-size:11px;
+  color:#667781;
+  margin-top:5px;
+}
+
+.wa-attached-q{
+  background:rgba(0,0,0,.05);
+  border-right:3px solid var(--chat-green);
+  padding:6px 10px;
+  border-radius:8px;
+  font-size:12px;
+  margin-bottom:6px;
+  color:#222;
+}
+
+.chat-input-row{
+  display:flex;
+  gap:10px;
+  align-items:stretch;
+}
+
+.chat-input{
+  flex:1;
+  min-height:56px;
+  resize:none;
+}
+
+/* شات المساعد الذكي الخاص بالمعلم */
+.teacher-ai-chat-box{
+  background:#fff9e8;
+  border:1.5px solid var(--yellow-soft);
+  border-radius:18px;
+  padding:16px;
+  height:340px;
+  overflow-y:auto;
+  margin:12px 0;
+}
+
+.tai-msg{
+  max-width:86%;
+  padding:11px 15px;
+  border-radius:16px;
+  margin-bottom:10px;
+  line-height:1.75;
+  font-size:14px;
+  white-space:pre-wrap;
+}
+
+.tai-msg.teacher-q{
+  background:var(--yellow-soft);
+  color:#222;
+  margin-right:auto;
+  border-top-right-radius:4px;
+  font-weight:600;
+}
+
+.tai-msg.ai-ans{
+  background:#ffffff;
+  color:#222;
+  margin-left:auto;
+  border-top-left-radius:4px;
+  border:1px solid #f0dfb0;
+  box-shadow:0 2px 8px rgba(0,0,0,.04);
+}
+
+.quick-prompts{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-bottom:10px;
+}
+
+.prompt-chip{
+  background:var(--yellow-light);
+  border:1.5px solid var(--yellow);
+  color:#5d4000;
+  padding:6px 12px;
+  border-radius:18px;
+  font-size:12.5px;
+  font-weight:700;
+}
+
+.prompt-chip:hover{
+  background:var(--yellow-soft);
+}
+
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:680px}
+th,td{padding:12px;text-align:right;border-bottom:1px solid #f2ead8;font-size:13px}
+th{background:var(--yellow-light);color:#7a5600;font-weight:800}
+
+.badge{
+  display:inline-block;
+  padding:4px 11px;
+  border-radius:20px;
+  font-size:11.5px;
+  font-weight:800;
+  background:var(--yellow-light);
+  border:1px solid var(--yellow);
+  color:#7a5600;
+}
+
+.badge.red-badge{
+  background:#ffebee;
+  border-color:#ffcdd2;
+  color:var(--red);
+}
+
+.badge.ok-badge{
+  background:#e8f5e9;
+  border-color:#a5d6a7;
+  color:#1b5e20;
+}
+
+.filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.filters input,.filters select{
+  padding:10px 13px;
+  border:2px solid #e6dec8;
+  border-radius:12px;
+  background:var(--white);
+  min-width:170px;
+}
+
+.sections-mini-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:14px;
+}
+
+.detail-block{
+  padding:13px 15px;
+  background:#fffdf5;
+  border-radius:14px;
+  margin:10px 0;
+  border-right:4px solid var(--yellow);
+  border-top:1px solid #f3e8c8;
+}
+
+.detail-block h4{margin:0 0 6px;color:var(--red)}
+.detail-block p{margin:4px 0;font-size:13px;line-height:1.8;white-space:pre-wrap}
+
+.empty{
+  text-align:center;
+  padding:24px 14px;
+  color:#888;
+  font-size:13.5px;
+  background:#fffdf5;
+  border-radius:14px;
+}
+
+.msg-success{
+  margin-top:10px;
+  padding:10px 14px;
+  border-radius:12px;
+  background:var(--yellow-light);
+  border:1.5px solid var(--yellow);
+  color:#7a5600;
+  font-weight:800;
+  font-size:13px;
+}
+
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.5);
+  z-index:300;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:15px;
+}
+.modal.show{display:flex}
+.modal-content{
+  width:100%;max-width:760px;max-height:90vh;overflow-y:auto;
+  background:var(--white);border-radius:24px;padding:22px;border-top:6px solid var(--yellow);
+}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.close-btn{border:0;background:#ffebee;color:var(--red);border-radius:10px;padding:6px 12px;font-weight:900}
+
+.mobile-menu{display:none}
+
+@media(max-width:1000px){
+  .sections-mini-grid{grid-template-columns:repeat(2,1fr)}
+}
+
+@media(max-width:750px){
+  .four-squares-grid{grid-template-columns:1fr}
+  .sidebar{transform:translateX(100%);transition:.25s}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-right:0;width:100%;padding:16px 13px 45px}
+  .mobile-menu{display:inline-block}
+  .chat-input-row{flex-direction:column}
+}
+</style>
+</head>
+
+<body class="locked">
+
+<!-- واجهة تسجيل دخول المعلم -->
+<div id="teacherLoginGate" class="teacher-login-gate">
+  <div class="login-card">
+    <div style="font-size:46px">👩‍🏫</div>
+    <h1>Mind AI — بوابة المعلم</h1>
+    <p>سجّل دخولك لمتابعة طلاب الصف الرابع الأساسي وإدارة التقييم والشعب والواجبات والمساعد الذكي.</p>
+
+    <div class="login-field">
+      <label>اسم المعلم / المعلمة</label>
+      <input id="loginTeacherName" type="text" placeholder="مثال: أ. رزان الطهراوي">
+    </div>
+
+    <div class="login-field">
+      <label>المدرسة</label>
+      <select id="loginTeacherSchool">
+        <option value="">-- اختر المدرسة --</option>
+        <option value="مدرسة الأمل الأساسية المختلطة">مدرسة الأمل الأساسية المختلطة</option>
+        <option value="مدرسة التفوق النموذجية">مدرسة التفوق النموذجية</option>
+        <option value="مدرسة الملك عبد الله الثاني للتميز">مدرسة الملك عبد الله الثاني للتميز</option>
+      </select>
+    </div>
+
+    <div class="login-field">
+      <label>الشعبة</label>
+      <select id="loginTeacherSection">
+        <option value="الكل">جميع الشعب (أ، ب، ج، د)</option>
+        <option value="أ">الشعبة أ</option>
+        <option value="ب">الشعبة ب</option>
+        <option value="ج">الشعبة ج</option>
+        <option value="د">الشعبة د</option>
+      </select>
+    </div>
+
+    <button type="button" class="primary-btn" style="width:100%;padding:12px" onclick="loginTeacher()">دخول إلى Mind AI</button>
+    <div id="loginError" class="login-error">❌ يرجى إدخال اسم المعلم واختيار المدرسة.</div>
+  </div>
+</div>
+
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="side-brand">
+      <div class="side-logo">M</div>
+      <div>
+        <strong>Mind AI</strong>
+        <small>بوابة المعلم • الصف الرابع</small>
+      </div>
+    </div>
+
+    <button class="nav-btn active" data-panel="homePanel">🏠 الواجهة الرئيسية</button>
+    <button class="nav-btn" data-panel="studentsPanel">👨‍🎓 تقييم الطلاب</button>
+    <button class="nav-btn" data-panel="sectionsPanel">🏫 تقييم الشعب</button>
+    <button class="nav-btn" data-panel="assignmentsPanel">📌 واجبات وكويزات</button>
+    <button class="nav-btn" data-panel="aiPanel">🤖 المساعد الذكي</button>
+    <button class="nav-btn" onclick="showAbout()">ℹ️ حول Mind AI</button>
+
+    <button class="nav-btn logout-btn" onclick="logoutTeacher()">🚪 تسجيل خروج</button>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <button class="secondary-btn mobile-menu" id="mobileMenu">☰</button>
+        <h2 id="pageTitle">Mind AI — الواجهة الرئيسية</h2>
+        <p id="todayText">الصف الرابع الأساسي • الفصل الأول</p>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <select id="activeSchoolFilter" class="secondary-btn" onchange="refreshAllViews()">
+          <option value="">جميع المدارس</option>
+          <option value="مدرسة الأمل الأساسية المختلطة">مدرسة الأمل الأساسية المختلطة</option>
+          <option value="مدرسة التفوق النموذجية">مدرسة التفوق النموذجية</option>
+          <option value="مدرسة الملك عبد الله الثاني للتميز">مدرسة الملك عبد الله الثاني للتميز</option>
+        </select>
+
+        <div class="teacher-chip">
+          <div class="avatar" id="teacherAvatar">م</div>
+          <div>
+            <strong id="teacherName">المعلم</strong>
+            <small style="display:block;color:#7a5600;font-weight:700" id="teacherSectionBadge">الصف الرابع</small>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="context-banner">
+      <h3 id="bannerTitle">🎓 Mind AI • الصف الرابع الأساسي</h3>
+    </div>
+
+    <!-- الواجهة الرئيسية: 4 مربعات + شات المعلم والطالب -->
+    <section class="panel active" id="homePanel">
+      <div class="four-squares-grid">
+        <div class="square-box sq-students">
+          <div>
+            <div class="square-top">
+              <div class="square-icon">👨‍🎓</div>
+              <span class="square-count" id="sqStudentsCount">0 طالب</span>
+            </div>
+            <h3>تقييم الطلاب</h3>
+            <p>متابعة بيانات الطلاب، محاولاتهم، التلميحات المستخدمة، ومشاكل الأسئلة.</p>
+          </div>
+          <button type="button" class="primary-btn" style="width:100%" onclick="switchPanel('studentsPanel')">فتح تقييم الطلاب</button>
+        </div>
+
+        <div class="square-box sq-sections">
+          <div>
+            <div class="square-top">
+              <div class="square-icon">🏫</div>
+              <span class="square-count">4 شعب (أ - د)</span>
+            </div>
+            <h3>تقييم الشعب</h3>
+            <p>استعراض توزيع الطلاب، التلميحات، والمشاكل في كل شعبة دراسية.</p>
+          </div>
+          <button type="button" class="yellow-btn" style="width:100%" onclick="switchPanel('sectionsPanel')">فتح تقييم الشعب</button>
+        </div>
+
+        <div class="square-box sq-assignments">
+          <div>
+            <div class="square-top">
+              <div class="square-icon">📌</div>
+              <span class="square-count" id="sqAssignmentsCount">0 واجب</span>
+            </div>
+            <h3>واجبات وكويزات</h3>
+            <p>إرسال واجبات وكويزات وأنشطة لتظهر مباشرة لدى الطلاب في صفحتهم.</p>
+          </div>
+          <button type="button" class="primary-btn" style="width:100%" onclick="switchPanel('assignmentsPanel')">فتح واجبات وكويزات</button>
+        </div>
+
+        <div class="square-box sq-ai">
+          <div>
+            <div class="square-top">
+              <div class="square-icon">🤖</div>
+              <span class="square-count" id="sqIssuesCount">0 مشكلة</span>
+            </div>
+            <h3>المساعد الذكي</h3>
+            <p>محادثة الذكاء الاصطناعي حول وضع الطلاب، التلميحات، والمشاكل، وبناء خطط متابعة.</p>
+          </div>
+          <button type="button" class="yellow-btn" style="width:100%" onclick="switchPanel('aiPanel')">فتح المساعد الذكي</button>
+        </div>
+      </div>
+
+      <!-- شات المعلم والطالب -->
+      <div class="card student-chat-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+          <div>
+            <h3>💬 تواصل مع الطالب</h3>
+            <p style="margin:3px 0 0;color:var(--muted);font-size:13px">محادثة مستقلة لكل مادة بين المعلم والطالب مع إظهار السؤال المرفق إن وُجد.</p>
+          </div>
+          <button type="button" class="secondary-btn" onclick="refreshAllViews()">🔄 تحديث</button>
+        </div>
+
+        <div class="subject-chat-tabs" id="subjectChatTabs">
+          <button type="button" class="subject-tab-btn active" data-subj="math" onclick="selectChatSubject('math')">🔢 الرياضيات</button>
+          <button type="button" class="subject-tab-btn" data-subj="science" onclick="selectChatSubject('science')">🧪 العلوم</button>
+          <button type="button" class="subject-tab-btn" data-subj="arabic" onclick="selectChatSubject('arabic')">📖 اللغة العربية</button>
+          <button type="button" class="subject-tab-btn" data-subj="english" onclick="selectChatSubject('english')">🔤 اللغة الإنجليزية</button>
+        </div>
+
+        <div id="waChatMessages" class="wa-chat-box"></div>
+
+        <div class="chat-input-row">
+          <textarea id="waChatInput" class="field chat-input" style="margin:0" placeholder="اكتب رسالتك للطالب هنا..."></textarea>
+          <button type="button" class="chat-send-btn" onclick="sendTeacherChatMessage()">إرسال</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- قسم 1: تقييم الطلاب -->
+    <section class="panel" id="studentsPanel">
+      <div style="margin-bottom:14px;display:flex;gap:8px;flex-wrap:wrap">
+        <button type="button" class="secondary-btn" onclick="switchPanel('homePanel')">⬅ رجوع للواجهة الرئيسية</button>
+        <button type="button" class="yellow-btn" onclick="refreshAllViews()">🔄 تحديث المحاولات من قاعدة البيانات</button>
+      </div>
+
+      <div class="card">
+        <h3>👨‍🎓 تقييم الطلاب الحقيقي والمشاكل</h3>
+        <div class="filters">
+          <input id="studentSearch" placeholder="ابحث باسم الطالب..." oninput="renderStudentsTable()">
+          <select id="studentSectionFilter" onchange="renderStudentsTable()">
+            <option value="">جميع الشعب</option>
+            <option value="أ">الشعبة أ</option>
+            <option value="ب">الشعبة ب</option>
+            <option value="ج">الشعبة ج</option>
+            <option value="د">الشعبة د</option>
+          </select>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>اسم الطالب</th>
+                <th>المدرسة</th>
+                <th>الشعبة</th>
+                <th>المحاولات</th>
+                <th>التلميحات</th>
+                <th>المشاكل</th>
+                <th>التقييم</th>
+                <th>التفاصيل</th>
+              </tr>
+            </thead>
+            <tbody id="studentsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card yellow-top">
+        <h3>🤔 سجل التلميحات المستخدمة ومشاكل الأسئلة والمحاولات</h3>
+        <div id="issuesAndAttemptsList"></div>
+      </div>
+    </section>
+
+    <!-- قسم 2: تقييم الشعب -->
+    <section class="panel" id="sectionsPanel">
+      <div style="margin-bottom:14px">
+        <button type="button" class="secondary-btn" onclick="switchPanel('homePanel')">⬅ رجوع للواجهة الرئيسية</button>
+      </div>
+
+      <div class="card">
+        <h3>🏫 تقييم الشعب الدراسية (الصف الرابع)</h3>
+        <div class="sections-mini-grid" id="sectionsGrid"></div>
+      </div>
+    </section>
+
+    <!-- قسم 3: واجبات وكويزات -->
+    <section class="panel" id="assignmentsPanel">
+      <div style="margin-bottom:14px">
+        <button type="button" class="secondary-btn" onclick="switchPanel('homePanel')">⬅ رجوع للواجهة الرئيسية</button>
+      </div>
+
+      <div class="card yellow-top">
+        <h3>📌 إرسال واجب أو كويز جديد</h3>
+        <form id="assignmentForm">
+          <div class="field">
+            <label>المادة</label>
+            <select id="assignmentSubject">
+              <option value="math">كتاب الرياضيات</option>
+              <option value="science">كتاب العلوم</option>
+              <option value="arabic">كتاب اللغة العربية</option>
+              <option value="english">كتاب اللغة الإنجليزية</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>العنوان</label>
+            <input id="assignmentTitle" required placeholder="مثال: مراجعة الوحدة الأولى">
+          </div>
+          <div class="field">
+            <label>النوع</label>
+            <select id="assignmentType">
+              <option value="واجب">واجب</option>
+              <option value="كويز">كويز</option>
+              <option value="نشاط">نشاط</option>
+              <option value="اختبار">اختبار</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>الشعبة</label>
+            <select id="assignmentSection">
+              <option value="الكل">جميع الشعب</option>
+              <option value="أ">الشعبة أ</option>
+              <option value="ب">الشعبة ب</option>
+              <option value="ج">الشعبة ج</option>
+              <option value="د">الشعبة د</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>التعليمات</label>
+            <textarea id="assignmentInstructions" rows="3" placeholder="اكتب تعليمات الواجب أو الكويز..."></textarea>
+          </div>
+          <div class="field">
+            <label>ملف مرفق (اختياري)</label>
+            <input type="file" id="assignmentFile">
+          </div>
+          <button type="submit" class="primary-btn">إرسال الواجب</button>
+          <div id="assignmentMessage"></div>
+        </form>
+      </div>
+
+      <div class="card">
+        <h3>الواجبات والكويزات المرسلة</h3>
+        <div id="assignmentsList"></div>
+      </div>
+    </section>
+
+    <!-- قسم 4: المساعد الذكي الخاص بالمعلم -->
+    <section class="panel" id="aiPanel">
+      <div style="margin-bottom:14px">
+        <button type="button" class="secondary-btn" onclick="switchPanel('homePanel')">⬅ رجوع للواجهة الرئيسية</button>
+      </div>
+
+      <div class="card yellow-top">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+          <div>
+            <h3>🤖 المساعد الذكي الخاص بالمعلم — Mind AI</h3>
+            <p style="margin:2px 0 0;color:var(--muted);font-size:13px">اسأله مباشرة عن وضع الطلاب، محاولاتهم، التلميحات، المشاكل، أو اطلب خطة متابعة.</p>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <select id="aiSubject" style="padding:8px 12px;border-radius:12px;border:2px solid #e6dec8;background:#fff">
+              <option value="all">جميع المواد</option>
+              <option value="math">كتاب الرياضيات</option>
+              <option value="science">كتاب العلوم</option>
+              <option value="arabic">كتاب اللغة العربية</option>
+              <option value="english">كتاب اللغة الإنجليزية</option>
+            </select>
+            <button type="button" class="secondary-btn" onclick="clearTeacherAiChat()">مسح المحادثة</button>
+          </div>
+        </div>
+
+        <div class="quick-prompts" style="margin-top:12px">
+          <button type="button" class="prompt-chip" onclick="askPresetTeacherAi('لخّص وضع الطلاب الحالي والمحاولات والمشاكل')">📊 ملخص وضع الطلاب</button>
+          <button type="button" class="prompt-chip" onclick="askPresetTeacherAi('من الطلاب الذين يحتاجون متابعة أو دعم إضافي؟')">🎯 الطلاب المحتاجون للدعم</button>
+          <button type="button" class="prompt-chip" onclick="askPresetTeacherAi('ما أكثر المشاكل والتلميحات تكرراً لدى الطلاب؟')">💡 تحليل التلميحات والمشاكل</button>
+          <button type="button" class="prompt-chip" onclick="askPresetTeacherAi('اقترح خطة علاجية عملية للطلاب بناءً على أدائهم')">📝 خطة علاجية للطلاب</button>
+        </div>
+
+        <div id="teacherAiChatBox" class="teacher-ai-chat-box">
+          <div class="tai-msg ai-ans">أهلاً بك أستاذ/أستاذة 👋 أنا مساعدك الذكي الخاص بمتابعة وضع الطلاب. يمكنك سؤالي عن أداء أي طالب أو شعبة أو عن المحاولات والتلميحات والمشاكل المسجلة.</div>
+        </div>
+
+        <div class="chat-input-row">
+          <textarea id="teacherAiInput" class="field chat-input" style="margin:0" placeholder="اكتب سؤالك للمساعد الذكي حول وضع الطلاب..."></textarea>
+          <button id="sendTeacherAiBtn" type="button" class="primary-btn" onclick="sendTeacherAiQuestion()">إرسال للـ AI</button>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- نافذة التفاصيل -->
+<div class="modal" id="detailModal">
+  <div class="modal-content">
+    <div class="modal-head">
+      <h3 id="detailTitle">التفاصيل</h3>
+      <button class="close-btn" onclick="closeModal()">إغلاق ✕</button>
+    </div>
+    <div id="detailContent"></div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEYS = {
+  teacherSession: "mathmind_teacher_session_v1",
+  students: "mathmind_students_v1",
+  attempts: "mindai_student_attempts",
+  legacyAttempts: "mathmind_attempts_v1",
+  issues: "mindai_student_hint_logs",
+  legacyIssues: "mathmind_issues_v1",
+  assignments: "mindai_teacher_assignments",
+  legacyAssignments: "mathmind_assignments_v1",
+  messages: "mindai_wa_messages",
+  legacyMessages: "mathmind_subject_messages_v1"
+};
+
+const SUBJECT_NAMES = {
+  math: "كتاب الرياضيات",
+  science: "كتاب العلوم",
+  arabic: "كتاب اللغة العربية",
+  english: "كتاب اللغة الإنجليزية"
+};
+
+const SECTIONS = ["أ", "ب", "ج", "د"];
+
+let currentTeacher = null;
+let activeChatSubject = "math";
+let studentsCache = [];
+let attemptsCache = [];
+let issuesCache = [];
+let assignmentsCache = [];
+let messagesCache = [];
+let teacherAiHistory = [];
+
+const $ = id => document.getElementById(id);
+
+function escapeHTML(val){
+  return String(val ?? "").replace(/[&<>"']/g, ch => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+  })[ch]);
+}
+
+function formatDate(val){
+  if(!val) return "الآن";
+  const d = new Date(val);
+  return Number.isNaN(d.getTime()) ? "الآن" : d.toLocaleString("ar-JO");
+}
+
+function readArr(key){
+  try{
+    const arr = JSON.parse(localStorage.getItem(key) || "[]");
+    return Array.isArray(arr) ? arr : [];
+  }catch(_){
+    return [];
+  }
+}
+
+function writeArr(key, arr){
+  localStorage.setItem(key, JSON.stringify(arr));
+}
+
+function mergeByIdOrSignature(primaryArr, secondaryArr){
+  const map = new Map();
+  [...secondaryArr, ...primaryArr].forEach((item, idx) => {
+    const key = item.id ? String(item.id) : `sig_${idx}_${item.created_at || item.createdAt || ""}_${item.student_name || item.studentName || ""}_${item.question_number || ""}`;
+    map.set(key, { ...(map.get(key) || {}), ...item });
+  });
+  return Array.from(map.values()).sort((a, b) => {
+    const da = new Date(b.created_at || b.createdAt || 0).getTime();
+    const db = new Date(a.created_at || a.createdAt || 0).getTime();
+    return da - db;
+  });
+}
+
+function normalizeStudentName(item){
+  return String(item.student_name || item.studentName || item.name || item.full_name || "").trim();
+}
+
+function collectStudents(){
+  const raw = readArr(STORAGE_KEYS.students);
+  const map = new Map();
+
+  raw.forEach(s => {
+    const name = normalizeStudentName(s);
+    if(!name) return;
+    map.set(name.toLowerCase(), {
+      name,
+      school: s.school || s.schoolName || "",
+      section: s.section || s.classSection || "أ"
+    });
+  });
+
+  [...attemptsCache, ...issuesCache, ...messagesCache].forEach(item => {
+    const role = item.sender_role || item.sender || "";
+    if(role === "teacher") return;
+    const name = normalizeStudentName(item);
+    if(!name) return;
+    const key = name.toLowerCase();
+    if(!map.has(key)){
+      map.set(key, {
+        name,
+        school: item.school || "",
+        section: item.section || "أ"
+      });
+    }
+  });
+
+  return Array.from(map.values());
+}
+
+function countHintsForItem(item){
+  if(typeof item.hints_used === "number") return item.hints_used;
+  if(typeof item.hintsUsed === "number") return item.hintsUsed;
+  if(typeof item.hintCount === "number") return item.hintCount;
+  if(Array.isArray(item.hints)) return item.hints.length;
+  if(item.hintUsed || item.usedHint || item.hint) return 1;
+  return 0;
+}
+
+function getStudentMetrics(studentName){
+  const target = String(studentName || "").trim().toLowerCase();
+  const sAttempts = attemptsCache.filter(a => normalizeStudentName(a).toLowerCase() === target);
+  const sIssues = issuesCache.filter(i => normalizeStudentName(i).toLowerCase() === target);
+  const sMessages = messagesCache.filter(m => {
+    const role = m.sender_role || m.sender || "";
+    return role !== "teacher" && normalizeStudentName(m).toLowerCase() === target;
+  });
+
+  const hintsCount = sAttempts.reduce((sum, a) => sum + countHintsForItem(a), 0)
+    + sIssues.reduce((sum, i) => sum + countHintsForItem(i), 0);
+
+  const attemptsCount = sAttempts.length;
+  const issuesCount = sIssues.filter(i => i.student_issue || i.issue || i.problem).length;
+
+  let score = 70;
+  if(attemptsCount > 0){
+    const penaltyPerAttempt = (hintsCount * 6) + (issuesCount * 12);
+    const avgPenalty = penaltyPerAttempt / attemptsCount;
+    score = Math.round(Math.max(25, Math.min(100, 94 - avgPenalty + Math.min(6, attemptsCount * 2))));
+  }else if(issuesCount > 0){
+    score = Math.max(30, 65 - issuesCount * 10);
+  }
+
+  let level = "متوسط";
+  if(score >= 80) level = "ممتاز";
+  else if(score >= 60) level = "جيد / يحتاج متابعة";
+  else level = "يحتاج دعم عاجل";
+
+  return {
+    attempts: sAttempts,
+    issues: sIssues,
+    messages: sMessages,
+    attemptsCount,
+    hintsCount,
+    issuesCount,
+    score,
+    level
+  };
+}
+
+async function fetchSupabaseTableSafe(tableName){
+  if(!window.supabaseClient) return [];
+  try{
+    const { data, error } = await window.supabaseClient
+      .from(tableName)
+      .select("*")
+      .limit(400);
+    if(!error && Array.isArray(data)){
+      return data;
+    }
+  }catch(e){
+    console.warn(`تعذر قراءة جدول ${tableName}:`, e.message || e);
+  }
+  return [];
+}
+
+async function loadAllData(){
+  const localAttempts = mergeByIdOrSignature(readArr(STORAGE_KEYS.attempts), readArr(STORAGE_KEYS.legacyAttempts));
+  const localIssues = mergeByIdOrSignature(readArr(STORAGE_KEYS.issues), readArr(STORAGE_KEYS.legacyIssues));
+  const localAssignments = mergeByIdOrSignature(readArr(STORAGE_KEYS.assignments), readArr(STORAGE_KEYS.legacyAssignments));
+  const localMessages = mergeByIdOrSignature(readArr(STORAGE_KEYS.messages), readArr(STORAGE_KEYS.legacyMessages));
+
+  const [dbAttempts, dbIssues, dbAssignments, dbMessages] = await Promise.all([
+    fetchSupabaseTableSafe("student_attempts"),
+    fetchSupabaseTableSafe("student_hint_logs"),
+    fetchSupabaseTableSafe("teacher_assignments"),
+    fetchSupabaseTableSafe("teacher_student_messages")
+  ]);
+
+  attemptsCache = mergeByIdOrSignature(dbAttempts, localAttempts);
+  issuesCache = mergeByIdOrSignature(dbIssues, localIssues);
+  assignmentsCache = mergeByIdOrSignature(dbAssignments, localAssignments);
+  messagesCache = mergeByIdOrSignature(dbMessages, localMessages);
+
+  writeArr(STORAGE_KEYS.attempts, attemptsCache);
+  writeArr(STORAGE_KEYS.issues, issuesCache);
+  writeArr(STORAGE_KEYS.assignments, assignmentsCache);
+  writeArr(STORAGE_KEYS.messages, messagesCache);
+
+  studentsCache = collectStudents();
+}
+
+function getFilteredStudents(){
+  const school = ($("activeSchoolFilter")?.value || "").trim();
+  return studentsCache.filter(s => !school || !s.school || s.school === school);
+}
+
+function switchPanel(panelId){
+  document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+  document.querySelectorAll(".nav-btn[data-panel]").forEach(b => {
+    b.classList.toggle("active", b.dataset.panel === panelId);
+  });
+  const target = $(panelId);
+  if(target) target.classList.add("active");
+
+  const titles = {
+    homePanel: "Mind AI — الواجهة الرئيسية",
+    studentsPanel: "تقييم الطلاب والمحاولات",
+    sectionsPanel: "تقييم الشعب الدراسية",
+    assignmentsPanel: "واجبات وكويزات",
+    aiPanel: "المساعد الذكي الخاص بالمعلم"
+  };
+  if($("pageTitle")) $("pageTitle").textContent = titles[panelId] || "Mind AI — بوابة المعلم";
+  if($("sidebar")) $("sidebar").classList.remove("open");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function renderStudentsTable(){
+  const tbody = $("studentsTableBody");
+  if(!tbody) return;
+
+  const q = ($("studentSearch")?.value || "").trim().toLowerCase();
+  const secFilter = ($("studentSectionFilter")?.value || "").trim();
+
+  const list = getFilteredStudents().filter(s => {
+    const matchName = !q || s.name.toLowerCase().includes(q);
+    const matchSec = !secFilter || (s.section || "أ") === secFilter;
+    return matchName && matchSec;
+  });
+
+  if(!list.length){
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty">لا توجد بيانات طلاب أو محاولات مطابقة للفلتر الحالي.</div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = list.map((s, idx) => {
+    const m = getStudentMetrics(s.name);
+    const badgeClass = m.score >= 80 ? "badge ok-badge" : (m.score >= 60 ? "badge" : "badge red-badge");
+    return `
+      <tr>
+        <td><strong>${escapeHTML(s.name)}</strong></td>
+        <td>${escapeHTML(s.school || "غير محدد")}</td>
+        <td><span class="badge">شعبة ${escapeHTML(s.section || "أ")}</span></td>
+        <td><strong>${m.attemptsCount}</strong></td>
+        <td>${m.hintsCount}</td>
+        <td>${m.issuesCount}</td>
+        <td><span class="${badgeClass}">${m.score}% (${escapeHTML(m.level)})</span></td>
+        <td><button type="button" class="action-btn" onclick="openStudentDetail(${idx})">عرض التفاصيل</button></td>
+      </tr>
+    `;
+  }).join("");
+}
+
+function openStudentDetail(idx){
+  const q = ($("studentSearch")?.value || "").trim().toLowerCase();
+  const secFilter = ($("studentSectionFilter")?.value || "").trim();
+  const list = getFilteredStudents().filter(s => {
+    const matchName = !q || s.name.toLowerCase().includes(q);
+    const matchSec = !secFilter || (s.section || "أ") === secFilter;
+    return matchName && matchSec;
+  });
+  const s = list[idx];
+  if(!s) return;
+  const m = getStudentMetrics(s.name);
+
+  const attemptsHtml = m.attempts.length ? m.attempts.map(a => `
+    <div class="detail-block">
+      <h4>${escapeHTML(a.subject || SUBJECT_NAMES[a.subject_key] || "مادة")} — سؤال ${escapeHTML(a.question_number || "")}</h4>
+      <p><strong>الدرس:</strong> ${escapeHTML(a.lesson || "-")}</p>
+      <p><strong>السؤال:</strong> ${escapeHTML(a.question_text || a.question || "-")}</p>
+      <p><strong>إجابة الطالب:</strong> ${escapeHTML(a.student_answer || a.answer || "-")}</p>
+      <p><strong>التلميحات المستخدمة:</strong> ${countHintsForItem(a)} • <strong>الحالة:</strong> ${escapeHTML(a.evaluation_status || "بانتظار التقييم")}</p>
+      <p><small>${escapeHTML(formatDate(a.created_at || a.createdAt))}</small></p>
+    </div>
+  `).join("") : `<p style="color:#777">لا توجد محاولات مسجلة لهذا الطالب.</p>`;
+
+  const issuesHtml = m.issues.length ? m.issues.map(i => `
+    <div class="detail-block">
+      <h4>مشكلة / تلميح — ${escapeHTML(i.subject || SUBJECT_NAMES[i.subject_key] || "مادة")}</h4>
+      <p><strong>المشكلة:</strong> ${escapeHTML(i.student_issue || i.issue || "-")}</p>
+      <p><strong>التلميحات:</strong> ${countHintsForItem(i)}</p>
+      <p><small>${escapeHTML(formatDate(i.created_at || i.createdAt))}</small></p>
+    </div>
+  `).join("") : `<p style="color:#777">لا توجد مشاكل مسجلة.</p>`;
+
+  $("detailTitle").textContent = `ملف الطالب: ${s.name}`;
+  $("detailContent").innerHTML = `
+    <p><strong>المدرسة:</strong> ${escapeHTML(s.school || "-")} • <strong>الشعبة:</strong> ${escapeHTML(s.section || "أ")}</p>
+    <p><strong>التقييم:</strong> ${m.score}% (${escapeHTML(m.level)})</p>
+    <h4 style="color:var(--red);margin-top:14px">المحاولات (${m.attempts.length})</h4>
+    ${attemptsHtml}
+    <h4 style="color:var(--red);margin-top:14px">المشاكل والتلميحات (${m.issues.length})</h4>
+    ${issuesHtml}
+  `;
+  $("detailModal").classList.add("show");
+}
+
+function renderIssuesAndAttempts(){
+  const box = $("issuesAndAttemptsList");
+  if(!box) return;
+
+  const school = ($("activeSchoolFilter")?.value || "").trim();
+  const filteredAttempts = attemptsCache.filter(a => !school || !a.school || a.school === school);
+
+  if(!filteredAttempts.length && !issuesCache.length){
+    box.innerHTML = `<div class="empty">لا توجد محاولات أو مشاكل مسجلة حتى الآن.</div>`;
+    return;
+  }
+
+  const attemptCards = filteredAttempts.slice(0, 40).map(a => {
+    const stName = normalizeStudentName(a) || "طالب";
+    const status = a.evaluation_status || "بانتظار التقييم";
+    const statusClass = status === "تم التقييم" ? "badge ok-badge" : "badge red-badge";
+    return `
+      <div class="detail-block">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+          <h4>👨‍🎓 ${escapeHTML(stName)} — ${escapeHTML(a.subject || SUBJECT_NAMES[a.subject_key] || "مادة")} (سؤال ${escapeHTML(a.question_number || "")})</h4>
+          <span class="${statusClass}">${escapeHTML(status)}</span>
+        </div>
+        <p><strong>الشعبة:</strong> ${escapeHTML(a.section || "أ")} • <strong>الدرس:</strong> ${escapeHTML(a.lesson || "-")}</p>
+        <p><strong>السؤال:</strong> ${escapeHTML(a.question_text || a.question || "-")}</p>
+        <p><strong>إجابة الطالب:</strong> ${escapeHTML(a.student_answer || a.answer || "-")}</p>
+        ${a.recorded_issue ? `<p><strong>مشكلة مسجلة:</strong> ${escapeHTML(a.recorded_issue)}</p>` : ""}
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-top:8px">
+          <small style="color:#666">${escapeHTML(formatDate(a.created_at || a.createdAt))}</small>
+          <button type="button" class="action-btn" onclick="markAttemptEvaluated('${escapeHTML(a.id || "")}')">✓ اعتماد التقييم</button>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  box.innerHTML = attemptCards || `<div class="empty">لا توجد محاولات طلاب ظاهرة بعد.</div>`;
+}
+
+async function markAttemptEvaluated(attemptId){
+  if(!attemptId) return;
+  attemptsCache = attemptsCache.map(a => a.id === attemptId ? { ...a, evaluation_status: "تم التقييم" } : a);
+  writeArr(STORAGE_KEYS.attempts, attemptsCache);
+  if(window.supabaseClient){
+    try{
+      await window.supabaseClient.from("student_attempts").update({ evaluation_status: "تم التقييم" }).eq("id", attemptId);
+    }catch(_){}
+  }
+  renderIssuesAndAttempts();
+  renderStudentsTable();
+}
+
+function renderSections(){
+  const grid = $("sectionsGrid");
+  if(!grid) return;
+
+  const fStudents = getFilteredStudents();
+  grid.innerHTML = SECTIONS.map(sec => {
+    const secStudents = fStudents.filter(s => (s.section || "أ") === sec);
+    let totalAttempts = 0;
+    let totalHints = 0;
+    secStudents.forEach(s => {
+      const m = getStudentMetrics(s.name);
+      totalAttempts += m.attemptsCount;
+      totalHints += m.hintsCount;
+    });
+    return `
+      <div class="detail-block" style="margin:0">
+        <h4>الشعبة ${escapeHTML(sec)}</h4>
+        <p><strong>عدد الطلاب:</strong> ${secStudents.length}</p>
+        <p><strong>المحاولات:</strong> ${totalAttempts}</p>
+        <p><strong>التلميحات:</strong> ${totalHints}</p>
+      </div>
+    `;
+  }).join("");
+}
+
+function renderAssignments(){
+  const listEl = $("assignmentsList");
+  if(!listEl) return;
+
+  if(!assignmentsCache.length){
+    listEl.innerHTML = `<div class="empty">لم يتم إرسال واجبات أو كويزات بعد.</div>`;
+    return;
+  }
+
+  listEl.innerHTML = assignmentsCache.map(a => `
+    <div class="detail-block">
+      <h4>${escapeHTML(a.title || "واجب")} <span class="badge">${escapeHTML(a.type || "واجب")}</span></h4>
+      <p><strong>المادة:</strong> ${escapeHTML(a.subject || SUBJECT_NAMES[a.subject_key] || "عام")} • <strong>الشعبة:</strong> ${escapeHTML(a.section || "الكل")}</p>
+      <p>${escapeHTML(a.description || a.instructions || "")}</p>
+      <small style="color:#666">${escapeHTML(formatDate(a.created_at || a.createdAt))}</small>
+    </div>
+  `).join("");
+}
+
+function selectChatSubject(subjKey){
+  activeChatSubject = subjKey || "math";
+  document.querySelectorAll("#subjectChatTabs .subject-tab-btn").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.subj === activeChatSubject);
+  });
+  renderSubjectChat();
+}
+
+function renderSubjectChat(){
+  const box = $("waChatMessages");
+  if(!box) return;
+
+  const list = messagesCache.filter(m => {
+    const key = m.subject_key || m.subjectKey || "math";
+    return key === activeChatSubject;
+  }).sort((a, b) => new Date(a.created_at || a.createdAt || 0) - new Date(b.created_at || b.createdAt || 0));
+
+  if(!list.length){
+    box.innerHTML = `<div class="empty" style="background:transparent">لا توجد رسائل في مادة ${escapeHTML(SUBJECT_NAMES[activeChatSubject] || "هذه المادة")} بعد.</div>`;
+    return;
+  }
+
+  box.innerHTML = list.map(m => {
+    const role = m.sender_role || m.sender || "student";
+    const isTeacher = role === "teacher";
+    const senderLabel = isTeacher
+      ? (m.sender_name || currentTeacher?.name || "المعلم")
+      : (normalizeStudentName(m) || m.sender_name || "الطالب");
+    const attached = m.attached_question
+      ? `<div class="wa-attached-q">📎 ${escapeHTML(m.attached_question)}</div>`
+      : "";
+    return `
+      <div class="wa-msg ${isTeacher ? "teacher" : "student"}">
+        ${attached}
+        <div>${escapeHTML(m.message_text || m.text || "")}</div>
+        <div class="wa-meta">
+          <span>${escapeHTML(senderLabel)}</span>
+          <span>${escapeHTML(formatDate(m.created_at || m.createdAt))}</span>
+        </div>
+      </div>
+    `;
+  }).join("");
+  box.scrollTop = box.scrollHeight;
+}
+
+async function sendTeacherChatMessage(){
+  const input = $("waChatInput");
+  const text = (input?.value || "").trim();
+  if(!text) return;
+
+  const msgObj = {
+    id: "tmsg_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6),
+    subject_key: activeChatSubject,
+    subject: SUBJECT_NAMES[activeChatSubject] || "مادة",
+    sender_role: "teacher",
+    sender_name: currentTeacher?.name || "المعلم",
+    school: currentTeacher?.school || "",
+    section: currentTeacher?.section || "الكل",
+    message_text: text,
+    created_at: new Date().toISOString()
+  };
+
+  messagesCache.push(msgObj);
+  writeArr(STORAGE_KEYS.messages, messagesCache);
+  input.value = "";
+  renderSubjectChat();
+
+  if(window.supabaseClient){
+    try{
+      await window.supabaseClient.from("teacher_student_messages").insert([msgObj]);
+    }catch(_){}
+  }
+}
+
+/* ===== المساعد الذكي التفاعلي الخاص بالمعلم حول وضع الطلاب ===== */
+function buildStudentsSnapshotContext(selectedSubjKey){
+  const fStudents = getFilteredStudents();
+  const filteredAttempts = attemptsCache.filter(a => !selectedSubjKey || selectedSubjKey === "all" || (a.subject_key || "") === selectedSubjKey);
+  const filteredIssues = issuesCache.filter(i => !selectedSubjKey || selectedSubjKey === "all" || (i.subject_key || "") === selectedSubjKey);
+
+  const studentSummaries = fStudents.map(s => {
+    const m = getStudentMetrics(s.name);
+    const recentIssues = m.issues.slice(0, 3).map(x => x.student_issue || x.issue).filter(Boolean).join("، ");
+    return {
+      name: s.name,
+      section: s.section || "أ",
+      attemptsCount: m.attemptsCount,
+      hintsCount: m.hintsCount,
+      issuesCount: m.issuesCount,
+      score: m.score,
+      level: m.level,
+      recentIssues
+    };
+  });
+
+  return {
+    subjectScope: selectedSubjKey === "all" ? "جميع المواد" : (SUBJECT_NAMES[selectedSubjKey] || selectedSubjKey),
+    totalStudents: fStudents.length,
+    totalAttempts: filteredAttempts.length,
+    totalIssues: filteredIssues.length,
+    students: studentSummaries,
+    recentAttempts: filteredAttempts.slice(0, 12).map(a => ({
+      student: normalizeStudentName(a) || "طالب",
+      subject: a.subject || SUBJECT_NAMES[a.subject_key] || "",
+      lesson: a.lesson || "",
+      questionNumber: a.question_number || "",
+      answer: a.student_answer || a.answer || "",
+      status: a.evaluation_status || "بانتظار التقييم"
+    }))
+  };
+}
+
+function buildLocalTeacherAiReply(questionText, subjKey){
+  const snap = buildStudentsSnapshotContext(subjKey);
+  const qLower = questionText.toLowerCase();
+
+  // البحث عن اسم طالب محدد ورد في سؤال المعلم
+  const matchedStudent = snap.students.find(st => questionText.includes(st.name));
+  if(matchedStudent){
+    const issuesLine = matchedStudent.recentIssues
+      ? `• أبرز المشاكل المسجلة: ${matchedStudent.recentIssues}`
+      : "• لم تُسجّل مشاكل نصية إضافية للطالب.";
+    return `📌 تقرير وضع الطالب (${matchedStudent.name}) — ${snap.subjectScope}:\n` +
+      `• الشعبة: ${matchedStudent.section}\n` +
+      `• عدد المحاولات المرسلة: ${matchedStudent.attemptsCount}\n` +
+      `• عدد التلميحات المستخدمة: ${matchedStudent.hintsCount}\n` +
+      `• عدد المشاكل: ${matchedStudent.issuesCount}\n` +
+      `• التقييم التقديري: ${matchedStudent.score}% (${matchedStudent.level})\n` +
+      `${issuesLine}\n` +
+      `• توصية المتابعة: ${matchedStudent.score < 70 ? "تقديم سؤال تدريبي قصير مع تلميحين فقط ومتابعة فهم الخطوة الأولى." : "الاستمرار في الأسئلة التحليلية وتشجيعه على الحل المستقل."}`;
+  }
+
+  if(!snap.students.length && !snap.totalAttempts){
+    return `📊 حالة البيانات الحالية (${snap.subjectScope}):\n` +
+      `لا توجد محاولات أو طلاب مسجلون بعد في النطاق المحدد. بمجرد أن يبدأ الطلاب بإرسال محاولاتهم أو تسجيل مشاكل التلميحات، سأحلل مستوى كل طالب وشعبة وأقترح لك خطط متابعة دقيقة.`;
+  }
+
+  const needsSupport = snap.students.filter(s => s.score < 70 || s.issuesCount > 0);
+  const topStudents = [...snap.students].sort((a, b) => b.score - a.score).slice(0, 3);
+
+  if(qLower.includes("دعم") || qLower.includes("متابعة") || qLower.includes("ضعف") || qLower.includes("يحتاج")){
+    if(!needsSupport.length){
+      return `✅ بحسب البيانات الحالية في (${snap.subjectScope})، لا يوجد طلاب متعثرون بشكل حاد؛ جميع الطلاب ضمن مستوى جيد أو ممتاز (${snap.students.length} طلاب). أنصح بإعطائهم أسئلة إثرائية لرفع التفكير التحليلي.`;
+    }
+    const lines = needsSupport.map(s =>
+      `- ${s.name} (شعبة ${s.section}): ${s.attemptsCount} محاولة، ${s.hintsCount} تلميح، ${s.issuesCount} مشكلة — التقييم: ${s.score}% (${s.level})`
+    ).join("\n");
+    return `🎯 الطلاب الأكثر حاجة للمتابعة والدعم (${snap.subjectScope}):\n${lines}\n\nمقترح التدخل: مراجعة الأسئلة التي استخدموا فيها التلميحات وتخصيص واجب قصير يركز على الخطوات الأساسية.`;
+  }
+
+  if(qLower.includes("تلميح") || qLower.includes("مشاكل") || qLower.includes("مشكلة")){
+    const issueTexts = issuesCache
+      .map(i => i.student_issue || i.issue)
+      .filter(Boolean)
+      .slice(0, 6);
+    const issuesSummary = issueTexts.length
+      ? issueTexts.map(t => `• ${t}`).join("\n")
+      : "• لا توجد نصوص مشاكل مفصلة مسجلة حتى الآن.";
+    return `💡 تحليل التلميحات والمشاكل (${snap.subjectScope}):\n` +
+      `• إجمالي المحاولات: ${snap.totalAttempts} | إجمالي سجلات التلميحات والمشاكل: ${snap.totalIssues}\n` +
+      `${issuesSummary}\n\nتوجيه مقترح: ابدأ شرح النقطة الصعبة بمثال محلول جزئياً واسأل الطلاب أين توقفوا قبل عرض التلميح التالي.`;
+  }
+
+  if(qLower.includes("خطة") || qLower.includes("علاجية") || qLower.includes("نشاط")){
+    return `📝 خطة متابعة وعلاج مقترحة (${snap.subjectScope}):\n` +
+      `1) فرز الطلاب حسب عدد المحاولات والتلميحات (المجموعة الأساسية والمجموعة الداعمة).\n` +
+      `2) مناقشة أكثر الأسئلة التي سجّل الطلاب فيها مشاكل أو طلبوا فيها تلميحات.\n` +
+      `3) إرسال واجب أو كويز قصير من تبويب «واجبات وكويزات» لقياس التحسن الفعلي.`;
+  }
+
+  const topNames = topStudents.map(s => `${s.name} (${s.score}%)`).join("، ");
+  return `📊 ملخص وضع الطلاب (${snap.subjectScope}):\n` +
+    `• عدد الطلاب الظاهرين: ${snap.totalStudents}\n` +
+    `• إجمالي المحاولات: ${snap.totalAttempts}\n` +
+    `• إجمالي التلميحات والمشاكل: ${snap.totalIssues}\n` +
+    `• الطلاب بحاجة لمتابعة: ${needsSupport.length}\n` +
+    (topNames ? `• الأعلى تقييماً حالياً: ${topNames}\n` : "") +
+    `\nيمكنك سؤالي باسم طالب محدد أو طلب خطة علاجية أو تحليل للمشاكل.`;
+}
+
+async function askTeacherAiModel(questionText, subjKey){
+  const snapshot = buildStudentsSnapshotContext(subjKey);
+
+  if(typeof window.TEACHER_AI_ENDPOINT === "string" && window.TEACHER_AI_ENDPOINT.trim()){
+    try{
+      const resp = await fetch(window.TEACHER_AI_ENDPOINT.trim(), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          role: "teacher_assistant",
+          prompt: questionText,
+          teacher: currentTeacher,
+          snapshot,
+          history: teacherAiHistory.slice(-8)
+        })
+      });
+      if(resp.ok){
+        const data = await resp.json();
+        if(data && typeof data.reply === "string" && data.reply.trim()){
+          return data.reply.trim();
+        }
+      }
+    }catch(err){
+      console.warn("تعذر الاتصال بنقطة نهاية مساعد المعلم، سيتم استخدام التحليل الذكي المحلي:", err.message || err);
+    }
+  }
+
+  if(window.supabaseClient && typeof window.supabaseClient.functions?.invoke === "function"){
+    try{
+      const { data, error } = await window.supabaseClient.functions.invoke("mind-ai-teacher", {
+        body: {
+          prompt: questionText,
+          teacher: currentTeacher,
+          snapshot,
+          history: teacherAiHistory.slice(-8)
+        }
+      });
+      if(!error && data && typeof data.reply === "string" && data.reply.trim()){
+        return data.reply.trim();
+      }
+    }catch(_){}
+  }
+
+  return buildLocalTeacherAiReply(questionText, subjKey);
+}
+
+function appendTeacherAiBubble(roleClass, text){
+  const box = $("teacherAiChatBox");
+  if(!box) return null;
+  const bubble = document.createElement("div");
+  bubble.className = `tai-msg ${roleClass}`;
+  bubble.textContent = text;
+  box.appendChild(bubble);
+  box.scrollTop = box.scrollHeight;
+  return bubble;
+}
+
+async function sendTeacherAiQuestion(customQuestion){
+  const input = $("teacherAiInput");
+  const btn = $("sendTeacherAiBtn");
+  const text = (typeof customQuestion === "string" ? customQuestion : (input?.value || "")).trim();
+  if(!text) return;
+
+  if(typeof customQuestion !== "string" && input){
+    input.value = "";
+  }
+
+  appendTeacherAiBubble("teacher-q", text);
+  const pendingBubble = appendTeacherAiBubble("ai-ans", "⏳ جاري تحليل بيانات الطلاب وإعداد الإجابة...");
+  if(btn) btn.disabled = true;
+
+  const subjKey = $("aiSubject")?.value || "all";
+  const reply = await askTeacherAiModel(text, subjKey);
+
+  if(pendingBubble){
+    pendingBubble.textContent = reply;
+  }
+  if(btn) btn.disabled = false;
+
+  teacherAiHistory.push({ q: text, a: reply });
+  if($("teacherAiChatBox")){
+    $("teacherAiChatBox").scrollTop = $("teacherAiChatBox").scrollHeight;
+  }
+}
+
+function askPresetTeacherAi(question){
+  sendTeacherAiQuestion(question);
+}
+
+function clearTeacherAiChat(){
+  teacherAiHistory = [];
+  if($("teacherAiChatBox")){
+    $("teacherAiChatBox").innerHTML = `<div class="tai-msg ai-ans">تم مسح المحادثة. اسألني الآن عن أي طالب أو شعبة أو محاولة.</div>`;
+  }
+}
+
+function showAbout(){
+  $("detailTitle").textContent = "حول منصة Mind AI";
+  $("detailContent").innerHTML = `
+    <p>منصة تعليمية تفاعلية لمتابعة طلاب الصف الرابع الأساسي في المنهاج الوزاري مع تلميحات متدرجة، تقييم مباشر للمحاولات والمشاكل، وتواصل مستمر بين المعلم والطالب، ومساعد ذكي خاص بالمعلم.</p>
+  `;
+  $("detailModal").classList.add("show");
+}
+
+function closeModal(){
+  $("detailModal").classList.remove("show");
+}
+
+function loginTeacher(){
+  const name = ($("loginTeacherName")?.value || "").trim();
+  const school = $("loginTeacherSchool")?.value || "";
+  const section = $("loginTeacherSection")?.value || "الكل";
+
+  if(!name || !school){
+    $("loginError").style.display = "block";
+    return;
+  }
+
+  $("loginError").style.display = "none";
+  currentTeacher = { name, school, section };
+  localStorage.setItem(STORAGE_KEYS.teacherSession, JSON.stringify(currentTeacher));
+  applySession();
+  refreshAllViews();
+}
+
+function logoutTeacher(){
+  localStorage.removeItem(STORAGE_KEYS.teacherSession);
+  currentTeacher = null;
+  document.body.classList.add("locked");
+  $("teacherLoginGate").classList.remove("hidden");
+}
+
+function applySession(){
+  if(!currentTeacher) return;
+  document.body.classList.remove("locked");
+  $("teacherLoginGate").classList.add("hidden");
+  $("teacherName").textContent = currentTeacher.name;
+  $("teacherAvatar").textContent = currentTeacher.name.trim().charAt(0) || "م";
+  $("teacherSectionBadge").textContent = `الصف الرابع • شعبة ${currentTeacher.section}`;
+  if(currentTeacher.school && $("activeSchoolFilter")) $("activeSchoolFilter").value = currentTeacher.school;
+  if(currentTeacher.section && currentTeacher.section !== "الكل" && $("studentSectionFilter")){
+    $("studentSectionFilter").value = currentTeacher.section;
+  }
+}
+
+async function refreshAllViews(){
+  await loadAllData();
+  const school = ($("activeSchoolFilter")?.value || "").trim();
+  if($("bannerTitle")){
+    $("bannerTitle").textContent = school
+      ? `🎓 Mind AI • ${school} • الصف الرابع الأساسي`
+      : "🎓 Mind AI • الصف الرابع الأساسي";
+  }
+
+  const fStudents = getFilteredStudents();
+  if($("sqStudentsCount")) $("sqStudentsCount").textContent = `${fStudents.length} طالب`;
+  if($("sqAssignmentsCount")) $("sqAssignmentsCount").textContent = `${assignmentsCache.length} واجب`;
+  if($("sqIssuesCount")) $("sqIssuesCount").textContent = `${issuesCache.length} مشكلة`;
+
+  renderStudentsTable();
+  renderIssuesAndAttempts();
+  renderSections();
+  renderAssignments();
+  renderSubjectChat();
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll(".nav-btn[data-panel]").forEach(btn => {
+    btn.addEventListener("click", () => switchPanel(btn.dataset.panel));
+  });
+
+  if($("mobileMenu") && $("sidebar")){
+    $("mobileMenu").addEventListener("click", () => $("sidebar").classList.toggle("open"));
+  }
+
+  if($("teacherAiInput")){
+    $("teacherAiInput").addEventListener("keydown", (e) => {
+      if(e.key === "Enter" && !e.shiftKey){
+        e.preventDefault();
+        sendTeacherAiQuestion();
+      }
+    });
+  }
+
+  if($("assignmentForm")){
+    $("assignmentForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const subjKey = $("assignmentSubject").value;
+      const title = ($("assignmentTitle").value || "").trim();
+      const type = $("assignmentType").value;
+      const section = $("assignmentSection").value;
+      const description = ($("assignmentInstructions").value || "").trim();
+      if(!title) return;
+
+      const assignObj = {
+        id: "asg_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6),
+        subject_key: subjKey,
+        subject: SUBJECT_NAMES[subjKey] || "مادة",
+        title,
+        type,
+        section,
+        school: ($("activeSchoolFilter")?.value || currentTeacher?.school || "الكل"),
+        teacher_name: currentTeacher?.name || "المعلم",
+        description,
+        created_at: new Date().toISOString()
+      };
+
+      assignmentsCache.unshift(assignObj);
+      writeArr(STORAGE_KEYS.assignments, assignmentsCache);
+
+      if(window.supabaseClient){
+        try{
+          await window.supabaseClient.from("teacher_assignments").insert([assignObj]);
+        }catch(_){}
+      }
+
+      $("assignmentForm").reset();
+      $("assignmentMessage").innerHTML = `<div class="msg-success">✅ تم إرسال «${escapeHTML(title)}» بنجاح.</div>`;
+      refreshAllViews();
+    });
+  }
+
+  window.addEventListener("storage", (ev) => {
+    if([STORAGE_KEYS.attempts, STORAGE_KEYS.issues, STORAGE_KEYS.messages, STORAGE_KEYS.assignments].includes(ev.key)){
+      refreshAllViews();
+    }
+  });
+
+  try{
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEYS.teacherSession) || "null");
+    if(saved && saved.name && saved.school){
+      currentTeacher = saved;
+      applySession();
+    }
+  }catch(_){}
+
+  refreshAllViews();
+  setInterval(refreshAllViews, 5000);
+});
+</script>
+</body>
+</html>
